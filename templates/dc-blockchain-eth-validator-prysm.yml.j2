@@ -1,0 +1,83 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|validator|prysm|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  validator:
+    container_name: "{{ container_name_validator }}"
+    image: {{ prysm_docker_image_validator }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    user: "{{ validator_client_user.uid}}:{{ validator_client_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/validator/prysm:{{ prysm_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+    ports:
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_api_port }}:{{ validator_api_port }}/tcp
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_client_metrics_port }}:{{ validator_client_metrics_port }}/tcp
+{% endif %}
+{% endif %}
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
+    expose:
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True %}
+      - {{ validator_api_port }}
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True  %}
+      - {{ validator_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "prysm"
+      slingnode_layer: "validator"
+    command:
+      - --datadir={{ prysm_data_dir }}
+      - --wallet-dir={{ prysm_wallet_dir }}
+      - --beacon-rpc-provider={{ prysm_beacon_rpc_provider }}
+      - --graffiti={{ graffiti }}
+      - --verbosity={{ prysm_log_level }}
+      - --{{ network }}
+      - --accept-terms-of-use
+{% if validator_client_metrics_enabled|bool == True  %}
+      - --monitoring-host=0.0.0.0
+      - --monitoring-port={{ validator_client_metrics_port }}
+{% endif %}
+{% if prysm_web|bool == True %}
+      - --web
+{% endif %}
+{% if validator_api_enabled|bool == True  %}
+      - --grpc-gateway-host=0.0.0.0
+      - --grpc-gateway-port={{ validator_api_port }}
+      - --grpc-gateway-corsdomain={{ prysm_grpc_gateway_corsdomain }}
+{% endif %}
+      - --beacon-rpc-gateway-provider={{ prysm_beacon_rpc_gateway_provider }}
+      - --suggested-fee-recipient={{ suggested_fee_recipient }}
+      - --enable-builder
+      - --wallet-password-file={{ prysm_wallet_password_file }}
+{% if prysm_enable_doppelganger|bool == True %}
+      - --enable-doppelganger
+{% endif %}
+      - --log-format=json
+
+
+networks:
+  service_net:
+    name: service_net

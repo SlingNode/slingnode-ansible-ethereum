@@ -1,0 +1,64 @@
+---
+# Configure firewall rules for RedHat based OS
+- name: Allow required connectivity for execution client Redhat based
+  ansible.posix.firewalld:
+    zone: public
+    port: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - "{{ consensus_client_p2p_port }}/tcp"
+    - "{{ consensus_client_p2p_port }}/udp"
+  when: ansible_os_family == 'RedHat' and enable_firewall | bool
+
+
+# Configure firewall rules for Debian based OS
+- name: Allow required connectivity for execution client Debian based
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ consensus_client_p2p_port }}", proto: tcp, rule: allow }
+    - { port: "{{ consensus_client_p2p_port }}", proto: udp, rule: allow }
+  when: ansible_os_family == 'Debian' and enable_firewall | bool
+
+
+- name: Create consensus client container group with correct gid
+  ansible.builtin.group:
+    name: "{{ consensus_client_group.group }}"
+    gid: "{{ consensus_client_group.gid }}"
+    state: present
+
+
+- name: Create consensus client container user with correct pid and add it to JWT access group
+  ansible.builtin.user:
+    name: "{{ consensus_client_user.user }}"
+    uid: "{{ consensus_client_user.uid }}"
+    group: "{{ consensus_client_group.group }}"
+    home: /dev/null
+    password_lock: true
+    shell: /sbin/nologin
+    groups:
+      - "{{ jwt_secret_access_group.group }}"
+    state: present
+
+
+- name: Set consensus client directory ownership and permissions
+  ansible.builtin.file:
+    path: "{{ blockchain_root_path }}/consensus/{{ clients.consensus }}"
+    state: directory
+    owner: "{{ consensus_client_user.user }}"
+    group: "{{ consensus_client_group.group }}"
+    mode: '0700'
+
+
+- name: Copy docker-compose files for consensus
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop:
+    - src: dc-blockchain-eth-consensus-{{ clients.consensus }}.yml.j2
+      dest: "{{ blockchain_docker_compose_path }}/dc-blockchain-eth-consensus-{{ clients.consensus }}.yml"

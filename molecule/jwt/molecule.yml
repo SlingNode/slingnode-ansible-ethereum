@@ -1,0 +1,72 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements_dev.yml
+    requirements-file: requirements.yml
+
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: false
+  cachier: machine
+  parallel: true
+  default_box: '${SLINGNODE_BOX:-generic/ubuntu2204}'
+
+
+platforms:
+  - name: instance
+    hostname: slingnode-test-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 10240
+    cpus: 4
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_PIPELINING: "True"
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    prepare: ../resources/playbooks/prepare.yml
+  inventory:
+    group_vars:
+      all:
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
+        jwt_secret_string: "7a813d06b0a08de1f1e70ebbc6b3ec8dc589f62d04d346b4754c9d739b4c648b"
+
+
+verifier:
+  name: ansible
+
+
+scenario:
+  name: jwt
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # - idempotence
+    # - side_effect
+    - verify
+    - destroy

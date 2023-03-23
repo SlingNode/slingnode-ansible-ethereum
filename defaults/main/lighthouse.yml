@@ -1,0 +1,29 @@
+---
+lighthouse_docker_image: sigp/lighthouse:v3.5.1-modern
+
+lighthouse_data_dir: /var/lib/lighthouse
+
+lighthouse_target_peers: 80
+
+# --debug-level <LEVEL>
+# Specifies the verbosity level used when emitting logs to the terminal
+lighthouse_log_level: info # possible values: info, debug, trace, warn, error, crit
+
+# In addition to outputing logs to the terminal Lighthouse creates a logfile
+# to which it logs at debug level. --logfile-max-number 0 disables the file logging.
+# See the bellow flags in lighthousse helo
+# --logfile-debug-level <LEVEL>
+# --logfile-max-number <COUNT>  |   If set to 0, background file logging is disabled.
+lighthouse_logfile_max_number: 0
+
+# Validator vars
+
+lighthouse_validator_http_allow_origin: "*"
+lighthouse_enable_doppelganger_protection: false
+lighthouse_enable_monitoring_endpoint: false
+lighthouse_monitoring_endpoint_api_key: ""
+lighthouse_monitoring_endpoint_machine_name: SlingNode
+lighthouse_monitoring_endpoint: >-
+  https://beaconcha.in/api/v1/client/metrics?apikey=
+  {{ lighthouse_monitoring_endpoint_api_key }}
+  &machine={{ lighthouse_monitoring_endpoint_machine_name }}

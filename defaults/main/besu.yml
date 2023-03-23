@@ -1,0 +1,27 @@
+---
+besu_docker_image: hyperledger/besu:23.1.1
+# Besu passes the contents of the BESU_OPTS environment variable to the JVM. Set standard JVM options in the BESU_OPTS variable.
+besu_opts: "-Xmx5g"
+
+besu_data_dir: /var/lib/besu
+besu_maxpeers: 25
+
+besu_rpc_http_api: WEB3,ETH,NET
+besu_rpc_http_cors_origins: "*"
+
+besu_rpc_ws_api: WEB3,ETH,NET
+besu_rpc_http_max_active_connections: 65536
+besu_host_allowlist: "*"
+besu_engine_host_allowlist: "*"
+
+besu_log_level: INFO  # log levels are OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL.
+
+besu_data_storage_format: BONSAI
+besu_sync_mode: X_SNAP
+besu_xbonsai_use_snapshots: false
+besu_pruning_enabled: false
+
+besu_graphql_http_enabled: false
+besu_graphql_http_host: 0.0.0.0
+besu_graphql_http_port: 8547
+besu_graphql_http_cors_origins: "*"

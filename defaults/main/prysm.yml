@@ -1,0 +1,26 @@
+---
+prysm_docker_image_beacon: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.2
+prysm_docker_image_validator: gcr.io/prysmaticlabs/prysm/validator:v3.2.2
+prysm_data_dir: /var/lib/prysm
+
+prysm_rpc_port: 4000
+expose_prysm_rpc_port_to_host: false
+
+prysm_http_modules: prysm,eth
+prysm_max_peers: 45
+
+# Logging verbosity (trace, debug, info=default, warn, error, fatal, panic) (default: "info")
+prysm_log_level: info
+
+
+# Validator vars
+
+prysm_web: true
+
+prysm_grpc_gateway_corsdomain: "*"
+prysm_wallet_dir: /var/lib/prysm
+prysm_wallet_password_file: /keystore/prysm_wallet_pass.txt
+prysm_beacon_rpc_provider: consensus:{{ prysm_rpc_port }}
+prysm_beacon_rpc_gateway_provider: consensus:{{ consensus_client_http_port }}
+
+prysm_enable_doppelganger: true

@@ -1,0 +1,23 @@
+---
+nimbus_docker_image_beacon: statusim/nimbus-eth2:amd64-v23.3.2
+nimbus_docker_image_validator: statusim/nimbus-validator-client:amd64-v23.3.2
+
+nimbus_data_dir: /var/lib/nimbus
+
+nimbus_max_peers: 160
+
+# https://nimbus.guide/logging.html
+nimbus_log_level: INFO
+
+nimbus_enr_auto_update: true
+
+# Validator vars
+
+nimbus_keymanager_allow_origin: "*"
+nimbus_container_keymanager_token_file: "{{ nimbus_data_dir }}/api-token.txt"
+
+nimbus_host_keymanager_token_file: "{{ blockchain_root_path }}/validator/nimbus/api-token.txt"
+nimbus_recreate_keymanager_token: false
+nimbus_restart_validator_container: false
+
+nimbus_doppelganger_detection: true

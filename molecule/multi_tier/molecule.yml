@@ -1,0 +1,132 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements_dev.yml
+    requirements-file: requirements.yml
+
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: false
+  cachier: machine
+  parallel: true
+  default_box: '${SLINGNODE_BOX:-generic/ubuntu2204}'
+
+
+platforms:
+  - name: slingnode-execution-01
+    hostname: slingnode-execution-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 6144
+    cpus: 2
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+  - name: slingnode-consensus-01
+    hostname: slingnode-consensus-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 6144
+    cpus: 2
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+  - name: slingnode-validator-01
+    hostname: slingnode-validator-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 2048
+    cpus: 2
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_PIPELINING: "True"
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    prepare: ../resources/playbooks/prepare.yml
+  inventory:
+    group_vars:
+      all:
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
+        suggested_fee_recipient: "0xa10214731A6D9eC03d36d1437796D1cEe6a061f7"
+        graffiti: SlingNode.com
+        jwt_secret_string: "7a813d06b0a08de1f1e70ebbc6b3ec8dc589f62d04d346b4754c9d739b4c648b"
+        host_ip_address_to_bind_to: 0.0.0.0
+        enable_firewall: false
+    host_vars:
+      slingnode-execution-01:
+        deploy_execution: true
+        deploy_consensus: false
+        deploy_validator: false
+        expose_execution_client_authrpc_port_to_host: true
+        expose_execution_client_json_rpc_port_to_host: true
+        expose_execution_client_metrics_port_to_host: true
+      slingnode-consensus-01:
+        deploy_execution: false
+        deploy_consensus: true
+        deploy_validator: false
+        execution_endpoint_authenticated: http://{{ hostvars['slingnode-execution-01']['ansible_default_ipv4']['address'] }}:{{ execution_client_authrpc_port }}
+        expose_consensus_client_http_port_to_host: true
+        expose_consensus_client_metrics_port_to_host: true
+        expose_prysm_rpc_port_to_host: true
+      slingnode-validator-01:
+        deploy_execution: false
+        deploy_consensus: false
+        deploy_validator: true
+        validator_api_enabled: true
+        expose_validator_client_metrics_port_to_host: true
+        expose_validator_api_port_to_host: true
+        beacon_node: "http://{{ hostvars['slingnode-consensus-01']['ansible_default_ipv4']['address'] }}:{{ consensus_client_http_port }}"
+        prysm_beacon_rpc_provider: "{{ hostvars['slingnode-consensus-01']['ansible_default_ipv4']['address'] }}:{{ prysm_rpc_port }}"
+        prysm_beacon_rpc_gateway_provider: "{{ hostvars['slingnode-consensus-01']['ansible_default_ipv4']['address'] }}:{{ consensus_client_http_port }}"
+        teku_validator_api_certificate_subject_alternative_names: >-
+          DNS:validator,DNS:localhost,IP:{{ hostvars['slingnode-validator-01']['ansible_default_ipv4']['address'] }}
+
+
+verifier:
+  name: ansible
+
+
+scenario:
+  name: multi_tier
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

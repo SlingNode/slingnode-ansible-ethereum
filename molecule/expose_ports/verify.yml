@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+
+    - name: Include test tasks - Containers are running
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/all_clients.yml
+
+
+    - name: Include test tasks - Ports are exposed to the host
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/expose_ports.yml

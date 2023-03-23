@@ -1,0 +1,105 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|execution|nethermind|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  execution:
+    container_name: "{{ container_name_execution }}"
+    image: {{ nethermind_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 3m
+    stop_signal: SIGINT
+    user: "{{ execution_client_user.uid}}:{{ execution_client_group.gid }}"
+    group_add:
+      - "{{ jwt_secret_access_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/execution/nethermind:{{ nethermind_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ jwt_secret_path }}/{{ jwt_secret_file }}:/jwt/{{ jwt_secret_file }}:ro
+      # Required to workaround a bug where Nethermind doesn't respect --datadir flag
+      - {{ blockchain_root_path }}/execution/nethermind/Nethermind:/nethermind/Nethermind:rw
+    ports:
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/tcp
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/udp
+{% if expose_execution_client_json_rpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_port }}:{{ execution_client_json_rpc_port }}/tcp
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_authrpc_port }}:{{ execution_client_authrpc_port }}/tcp
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_websocket_port }}:{{ execution_client_json_rpc_websocket_port }}/tcp
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == True and execution_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_metrics_port }}:{{ execution_client_metrics_port }}/tcp
+{% endif %}
+{% if
+      expose_execution_client_json_rpc_port_to_host|bool == False or
+      expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True or
+      expose_execution_client_authrpc_port_to_host|bool == False or
+      expose_execution_client_json_rpc_websocket_port_to_host|bool == False and execution_client_json_rpc_websocket_enabled|bool == True
+%}
+    expose:
+{% if expose_execution_client_json_rpc_port_to_host|bool == False %}
+      - {{ execution_client_json_rpc_port }}
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == False  %}
+      - {{ execution_client_authrpc_port }}
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == False  %}
+      - {{ execution_client_json_rpc_websocket_port }}
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True %}
+      - {{ execution_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "nethermind"
+      slingnode_layer: "execution"
+    command:
+      - --datadir={{ nethermind_data_dir }}
+      - --Network.DiscoveryPort={{ execution_client_p2p_port }}
+      - --Network.P2PPort={{ execution_client_p2p_port }}
+      - --Network.MaxActivePeers={{ nethermind_maxpeers }}
+      - --HealthChecks.Enabled={{ nethermind_health_checks_enabled | string | lower }}
+      - --HealthChecks.UIEnabled={{ nethermind_health_checks_uienabled | string | lower }}
+      - --JsonRpc.Enabled={{ nethermind_json_rpc_enabled }}
+      - --JsonRpc.Host=0.0.0.0
+      - --JsonRpc.Port={{ execution_client_json_rpc_port }}
+{% if execution_client_json_rpc_websocket_enabled|bool == True %}
+      - --Init.WebSocketsEnabled=true
+      - --JsonRpc.WebSocketsPort={{ execution_client_json_rpc_websocket_port }}
+{% endif %}
+      - --JsonRpc.AdditionalRpcUrls=http://0.0.0.0:{{ execution_client_authrpc_port }}|http;ws|engine;eth;subscribe
+      - --JsonRpc.JwtSecretFile=/jwt/{{ jwt_secret_file }}
+      - --JsonRpc.EnabledModules={{ nethermind_json_rpc_enabled_modules }}
+      - --Sync.SnapSync={{ nethermind_sync_snapsync | string | lower }}
+      - --Metrics.Enabled={{ execution_client_metrics_enabled | string | lower }}
+      - --Metrics.ExposePort={{ execution_client_metrics_port }}
+      - --Metrics.IntervalSeconds={{ nethermind_metrics_intervalseconds }}
+      - --config={{ network }}
+      - --Sync.AncientBodiesBarrier=1
+      - --Sync.AncientReceiptsBarrier=1
+      - --log={{ nethermind_log_level }}
+      - --Pruning.FullPruningMaxDegreeOfParallelism={{ nethermind_pruning_full_pruning_max_degree_of_parallelism }}
+
+
+networks:
+  service_net:
+    name: service_net

@@ -1,0 +1,11 @@
+---
+- name: Get execution container info
+  community.docker.docker_container_info:
+    name: execution
+  register: execution_container
+
+
+- name: Assert client containers are running
+  ansible.builtin.assert:
+    that:
+      - execution_container.container.State.Status == "running"

@@ -1,0 +1,105 @@
+---
+- name: Create validator client container group with correct gid
+  ansible.builtin.group:
+    name: "{{ validator_client_group.group }}"
+    gid: "{{ validator_client_group.gid }}"
+    state: present
+
+
+- name: Create validator client container user with correct pid
+  ansible.builtin.user:
+    name: "{{ validator_client_user.user }}"
+    uid: "{{ validator_client_user.uid }}"
+    group: "{{ validator_client_group.group }}"
+    home: /dev/null
+    password_lock: true
+    shell: /sbin/nologin
+    state: present
+
+
+- name: Set validator client directory ownership and permissions
+  ansible.builtin.file:
+    path: "{{ blockchain_root_path }}/validator/{{ clients.validator }}"
+    state: directory
+    owner: "{{ validator_client_user.user }}"
+    group: "{{ validator_client_group.group }}"
+    mode: '0700'
+    recurse: true
+
+
+- name: Check if Teku validator API keystore file exists
+  ansible.builtin.stat:
+    path: "{{ teku_validator_dir_path }}/validator_api_key.keystore"
+  register: teku_validator_api_keystore
+  when: clients.validator == "teku" and validator_api_enabled | bool
+
+
+# https://docs.teku.consensys.net/HowTo/External-Signer/Manage-keys#create-a-keystore
+- name: Generate x509 cert for Teku validator API
+  ansible.builtin.shell: |
+    set -euxo pipefail && __password=$(echo $RANDOM | md5sum | head -c 32)
+    set -euxo pipefail && echo "$__password" > "{{ teku_validator_dir_path }}/validator_api_key.password"
+    set -euxo pipefail && openssl req -x509 --newkey rsa:2048 -sha256 -days \
+    "{{ teku_validator_api_certificate_validity_days }}" -nodes \
+    -addext "subjectAltName={{ teku_validator_api_certificate_subject_alternative_names }}" -keyout "{{ teku_validator_dir_path }}/validator_api_key.key" \
+    -out "{{ teku_validator_dir_path }}/validator_api_key.crt" -subj "/CN=127.0.0.1"
+    set -euxo pipefail && openssl pkcs12 -export -in "{{ teku_validator_dir_path }}/validator_api_key.crt" \
+    -inkey "{{ teku_validator_dir_path }}/validator_api_key.key" -out "{{ teku_validator_dir_path }}/validator_api_key.keystore" \
+    -name teku-keyapi -passout pass:"$__password"
+  args:
+    executable: /bin/bash
+  register: shell_command_output
+  changed_when: shell_command_output.rc == 0
+  when: clients.validator == "teku" and validator_api_enabled and not teku_validator_api_keystore.stat.exists or teku_recreate_validator_api_keystore | bool
+
+
+- name: Restart validator container
+  community.docker.docker_container:
+    name: "{{ container_name_validator }}"
+    state: started
+    restart: true
+  when: clients.validator == "teku" and validator_api_enabled and teku_recreate_validator_api_keystore and teku_restart_validator_container | bool
+
+
+- name: Check if Nimbus keymanager token file exists
+  ansible.builtin.stat:
+    path: "{{ nimbus_host_keymanager_token_file }}"
+  register: nimbus_keymanager_token
+  when: clients.validator == "nimbus" and validator_api_enabled | bool
+
+
+- name: Generate Nimbus keymanager API token
+  ansible.builtin.shell: set -euxo pipefail && openssl rand -hex 18 | tr -d "\n" > "{{ nimbus_host_keymanager_token_file }}"
+  args:
+    executable: /bin/bash
+  register: shell_command_output
+  changed_when: shell_command_output.rc == 0
+  when: clients.validator == "nimbus" and validator_api_enabled and not nimbus_keymanager_token.stat.exists or nimbus_recreate_keymanager_token | bool
+
+
+- name: Set Nimbus keymanager API token file permissions
+  ansible.builtin.file:
+    path: "{{ nimbus_host_keymanager_token_file }}"
+    state: file
+    owner: "{{ validator_client_user.user }}"
+    group: "{{ validator_client_group.group }}"
+    mode: '0700'
+  when: clients.validator == "nimbus" and validator_api_enabled | bool
+
+
+- name: Restart validator container
+  community.docker.docker_container:
+    name: "{{ container_name_validator }}"
+    state: started
+    restart: true
+  when: clients.validator == "nimbus" and validator_api_enabled and nimbus_recreate_keymanager_token and nimbus_restart_validator_container | bool
+
+
+- name: Copy docker-compose files for validator
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop:
+    - src: dc-blockchain-eth-validator-{{ clients.validator }}.yml.j2
+      dest: "{{ blockchain_docker_compose_path }}/dc-blockchain-eth-validator-{{ clients.validator }}.yml"

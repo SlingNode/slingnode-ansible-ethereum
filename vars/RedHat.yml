@@ -1,0 +1,9 @@
+os_specific_packages:
+  # required to build crytpography module, dependecy for docker-compose
+  - "@Development Tools"
+  - libffi-devel
+  - python3-devel
+  - openssl-devel
+  - cargo
+
+firewall_package: firewalld

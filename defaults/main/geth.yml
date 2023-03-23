@@ -1,0 +1,19 @@
+---
+geth_docker_image: ethereum/client-go:v1.11.5
+geth_data_dir: /gethdata
+geth_maxpeers: 50
+
+geth_http_api: web3,eth,net
+geth_http_corsdomain: "*"
+geth_ws_enabled: "true"
+geth_ws_api: web3,eth,net
+geth_http_vhosts: "*"
+geth_authrpc_vhosts: "*"
+
+geth_log_level: 3 # Logging verbosity: 0=silent, 1=error, 2=warn, 3=info, 4=debug, 5=detail (default: 3)
+
+geth_metrics_expensive_enabled: true
+
+geth_graphql_enabled: false
+geth_graphql_corsdomain: "*"
+geth_graphql_vhosts: "*"

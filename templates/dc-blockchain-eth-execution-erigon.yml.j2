@@ -1,0 +1,109 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|execution|erigon|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  execution:
+    container_name: "{{ container_name_execution }}"
+    image: {{ erigon_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 5m
+    user: "{{ execution_client_user.uid}}:{{ execution_client_group.gid }}"
+    group_add:
+      - "{{ jwt_secret_access_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/execution/erigon:{{ erigon_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ jwt_secret_path }}/{{ jwt_secret_file }}:/jwt/{{ jwt_secret_file }}:ro
+    ports:
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/tcp
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/udp
+      # torrent ports
+      - {{ erigon_torrent_port }}:{{ erigon_torrent_port }}/tcp
+      - {{ erigon_torrent_port }}:{{ erigon_torrent_port }}/udp
+{% if expose_execution_client_json_rpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_port }}:{{ execution_client_json_rpc_port }}/tcp
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_authrpc_port }}:{{ execution_client_authrpc_port }}/tcp
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_websocket_port }}:{{ execution_client_json_rpc_websocket_port }}/tcp
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == True and execution_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_metrics_port }}:{{ execution_client_metrics_port }}/tcp
+{% endif %}
+{% if
+      expose_execution_client_json_rpc_port_to_host|bool == False or
+      expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True or
+      expose_execution_client_authrpc_port_to_host|bool == False or
+      expose_execution_client_json_rpc_websocket_port_to_host|bool == False and execution_client_json_rpc_websocket_enabled|bool == True
+%}
+    expose:
+{% if expose_execution_client_json_rpc_port_to_host|bool == False %}
+      - {{ execution_client_json_rpc_port }}
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == False  %}
+      - {{ execution_client_authrpc_port }}
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == False  %}
+      - {{ execution_client_json_rpc_websocket_port }}
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True %}
+      - {{ execution_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "erigon"
+      slingnode_layer: "execution"
+    command:
+      - --private.api.addr={{ erigon_private_api_addr }}
+      - --datadir={{ erigon_data_dir }}
+      - --port={{ execution_client_p2p_port }}
+      - --torrent.port={{ erigon_torrent_port }}
+      - --nat=any
+      - --chain={{ network }}
+      - --log.console.verbosity={{ erigon_log_level }}
+      - --log.console.json
+      - --prune={{ erigon_prune }}
+{% if execution_client_metrics_enabled|bool == True %}
+      - --metrics
+      - --metrics.port={{ execution_client_metrics_port }}
+      - --metrics.addr=0.0.0.0
+{% endif %}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port={{ execution_client_json_rpc_port }}
+      - --http.vhosts={{ erigon_http_vhosts }}
+      - --http.corsdomain={{ erigon_http_corsdomain }}
+      - --http.api={{ erigon_http_api }}
+{% if execution_client_json_rpc_websocket_enabled|bool == True %}
+      - --ws
+{% endif %}
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{ execution_client_authrpc_port }}
+      - --authrpc.vhosts={{ erigon_authrpc_vhosts }}
+      - --authrpc.jwtsecret=/jwt/{{ jwt_secret_file }}
+      - --externalcl
+      - --maxpeers={{ erigon_maxpeers }}
+
+
+networks:
+  service_net:
+    name: service_net

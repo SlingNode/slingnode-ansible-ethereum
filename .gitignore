@@ -1,0 +1,9 @@
+### Ansible ###
+*.retry
+.cache
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride

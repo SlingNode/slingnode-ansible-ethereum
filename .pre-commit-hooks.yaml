@@ -1,0 +1,8 @@
+- id: ansible-syntax-check
+  name: Syntax check Ansible playbooks
+  description: Check Ansible playbooks for syntax errors.
+  language: python
+  entry: ansible-playbook
+  files: playbook\.yml
+  types: [yaml]
+  args: ['--inventory=localhost,', '--syntax-check']

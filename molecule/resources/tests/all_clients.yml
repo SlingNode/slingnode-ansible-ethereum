@@ -1,0 +1,25 @@
+---
+- name: Get execution container info
+  community.docker.docker_container_info:
+    name: execution
+  register: execution_container
+
+
+- name: Get consensus container info
+  community.docker.docker_container_info:
+    name: consensus
+  register: consensus_container
+
+
+- name: Get validator container info
+  community.docker.docker_container_info:
+    name: validator
+  register: validator_container
+
+
+- name: Assert client containers are running
+  ansible.builtin.assert:
+    that:
+      - execution_container.container.State.Status == "running"
+      - consensus_container.container.State.Status == "running"
+      - validator_container.container.State.Status == "running"

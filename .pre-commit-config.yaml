@@ -1,0 +1,34 @@
+---
+repos:
+  - repo: https://github.com/ansible/ansible-lint.git
+    rev: v6.11.0
+    hooks:
+      - id: ansible-lint
+        always_run: true
+        pass_filenames: false
+        # do not add file filters here as ansible-lint does not give reliable
+        # results when called with individual files.
+        # https://github.com/ansible/ansible-lint/issues/611
+        files: \.(yaml|yml)$
+        verbose: true
+        entry: >
+          ansible-lint --force-color -v -c .ansible-lint
+        additional_dependencies:
+          # needed because our ansible filter imports it
+          - ansible-core
+          - molecule
+          - yamllint
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
+    rev: v4.0.1
+    hooks:
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: check-byte-order-marker
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: debug-statements
+        language_version: python3
+      - id: no-commit-to-branch
+        args: ['--branch', 'master', '--branch', 'main']

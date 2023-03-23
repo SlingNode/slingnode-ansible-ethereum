@@ -1,0 +1,78 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|validator|nimbus|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  validator:
+    container_name: "{{ container_name_validator }}"
+    image: {{ nimbus_docker_image_validator }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 1m
+    user: "{{ validator_client_user.uid}}:{{ validator_client_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/validator/nimbus:{{ nimbus_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ blockchain_root_path }}/validator/keystore:/keystore:ro
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+    ports:
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_api_port }}:{{ validator_api_port }}/tcp
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_client_metrics_port }}:{{ validator_client_metrics_port }}/tcp
+{% endif %}
+{% endif %}
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
+    expose:
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True %}
+      - {{ validator_api_port }}
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True  %}
+      - {{ validator_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "nimbus"
+      slingnode_layer: "validator"
+    command:
+      - --data-dir={{ nimbus_data_dir }}
+      - --non-interactive
+      - --beacon-node={{ beacon_node }}
+      - --graffiti={{ graffiti }}
+      - --log-level={{ nimbus_log_level }}
+      - --log-format=json
+      - --suggested-fee-recipient={{ suggested_fee_recipient }}
+      - --doppelganger-detection={{ nimbus_doppelganger_detection | string | lower }}
+{% if validator_client_metrics_enabled|bool == True  %}
+      - --metrics
+      - --metrics-port={{ validator_client_metrics_port }}
+      - --metrics-address=0.0.0.0
+{% endif %}
+{% if validator_api_enabled|bool == True  %}
+      - --keymanager
+      - --keymanager-port={{ validator_api_port }}
+      - --keymanager-address=0.0.0.0
+      - --keymanager-allow-origin={{ nimbus_keymanager_allow_origin }}
+      - --keymanager-token-file={{ nimbus_container_keymanager_token_file }}
+{% endif %}
+
+
+networks:
+  service_net:
+    name: service_net

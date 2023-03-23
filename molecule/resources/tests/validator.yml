@@ -1,0 +1,11 @@
+---
+- name: Get validator container info
+  community.docker.docker_container_info:
+    name: validator
+  register: validator_container
+
+
+- name: Assert client containers are running
+  ansible.builtin.assert:
+    that:
+      - validator_container.container.State.Status == "running"

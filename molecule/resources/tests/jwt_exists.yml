@@ -1,0 +1,11 @@
+---
+- name: Get the jwt secret file contents
+  ansible.builtin.slurp:
+    src: /opt/blockchain/jwt/jwt.hex
+  register: jwt_secret_file_contents
+
+
+- name: Assert retrieved JWT matches the one specified in the variable
+  ansible.builtin.assert:
+    that:
+      - jwt_secret_file_contents['content'] | b64decode == "7a813d06b0a08de1f1e70ebbc6b3ec8dc589f62d04d346b4754c9d739b4c648b"

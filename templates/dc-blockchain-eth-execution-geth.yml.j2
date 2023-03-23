@@ -1,0 +1,113 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|execution|geth|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  execution:
+    container_name: "{{ container_name_execution }}"
+    image: {{ geth_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 3m
+    user: "{{ execution_client_user.uid}}:{{ execution_client_group.gid }}"
+    group_add:
+      - "{{ jwt_secret_access_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/execution/geth:{{ geth_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ jwt_secret_path }}/{{ jwt_secret_file }}:/jwt/{{ jwt_secret_file }}:ro
+    ports:
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/tcp
+      - {{ execution_client_p2p_port }}:{{ execution_client_p2p_port }}/udp
+{% if expose_execution_client_json_rpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_port }}:{{ execution_client_json_rpc_port }}/tcp
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_authrpc_port }}:{{ execution_client_authrpc_port }}/tcp
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_json_rpc_websocket_port }}:{{ execution_client_json_rpc_websocket_port }}/tcp
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == True and execution_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ execution_client_metrics_port }}:{{ execution_client_metrics_port }}/tcp
+{% endif %}
+{% if
+      expose_execution_client_json_rpc_port_to_host|bool == False or
+      expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True or
+      expose_execution_client_authrpc_port_to_host|bool == False or
+      expose_execution_client_json_rpc_websocket_port_to_host|bool == False and execution_client_json_rpc_websocket_enabled|bool == True
+%}
+    expose:
+{% if expose_execution_client_json_rpc_port_to_host|bool == False %}
+      - {{ execution_client_json_rpc_port }}
+{% endif %}
+{% if expose_execution_client_authrpc_port_to_host|bool == False  %}
+      - {{ execution_client_authrpc_port }}
+{% endif %}
+{% if execution_client_json_rpc_websocket_enabled|bool == True and expose_execution_client_json_rpc_websocket_port_to_host|bool == False  %}
+      - {{ execution_client_json_rpc_websocket_port }}
+{% endif %}
+{% if expose_execution_client_metrics_port_to_host|bool == False and execution_client_metrics_enabled|bool == True %}
+      - {{ execution_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "geth"
+      slingnode_layer: "execution"
+    command:
+      - --{{ network }}
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.vhosts={{ geth_http_vhosts }}
+      - --http.corsdomain={{ geth_http_corsdomain }}
+      - --http.api={{ geth_http_api }}
+      - --datadir={{ geth_data_dir }}
+      - --port={{ execution_client_p2p_port }}
+      - --http.port={{ execution_client_json_rpc_port }}
+{% if execution_client_json_rpc_websocket_enabled|bool == True %}
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port={{ execution_client_json_rpc_websocket_port }}
+      - --ws.api={{ geth_ws_api }}
+{% endif %}
+{% if execution_client_metrics_enabled|bool == True %}
+      - --metrics
+{% if geth_metrics_expensive_enabled|bool == True %}
+      - --metrics.expensive
+{% endif %}
+      - --metrics.port={{ execution_client_metrics_port }}
+      - --pprof
+      - --pprof.addr=0.0.0.0
+{% endif  %}
+      - --authrpc.jwtsecret=/jwt/{{ jwt_secret_file }}
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port={{ execution_client_authrpc_port }}
+      - --authrpc.vhosts={{ geth_authrpc_vhosts }}
+      - --maxpeers={{ geth_maxpeers }}
+      - --log.json
+      - --verbosity={{ geth_log_level }}
+{% if geth_graphql_enabled|bool == True %}
+      - --graphql
+      - --graphql.corsdomain={{ geth_graphql_corsdomain }}
+      - --graphql.vhosts={{ geth_graphql_vhosts }}
+{% endif %}
+
+
+networks:
+  service_net:
+    name: service_net

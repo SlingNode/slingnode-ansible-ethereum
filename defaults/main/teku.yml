@@ -1,0 +1,59 @@
+---
+teku_docker_image: consensys/teku:23.3.0
+
+teku_java_opts: "-Xmx4g"
+teku_data_dir: /var/lib/teku
+
+teku_p2p_peer_upper_bound: 100
+teku_p2p_peer_lower_bound: 64
+
+
+teku_log_level: INFO # Log levels are OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE, ALL. Default is INFO.
+
+teku_rest_api_host_allowlist: "*"
+teku_rest_api_enabled: true
+teku_metrics_host_allowlist: "*"
+
+
+# Validator vars
+
+teku_validator_dir_path: "{{ blockchain_root_path }}/validator/{{ clients.validator }}"
+
+teku_validator_api_host_allowlist: "*"
+teku_validator_api_cors_origins: "*"
+
+teku_recreate_validator_api_keystore: false
+# if certificate is recreated the container needs to be restarted, set to true to restart upon cert recreation
+# teku_recreate_validator_api_keystore must be set to true too
+teku_restart_validator_container: false
+teku_validator_api_certificate_validity_days: 1095
+# defines SAN extension for the self signed certificate, add here DNS names or IP addresses you will use to access the API
+# 127.0.0.1 is already included, to add an IP address use the following format IP:192.168.7.1
+teku_validator_api_certificate_subject_alternative_names: DNS:validator,DNS:localhost
+
+teku_validators_early_attestations_enabled: false
+teku_validators_keystore_locking_enabled: false
+
+
+teku_keystore_file: ""
+teku_keystore_password_file: ""
+# --validator-keys=<KEY_DIR>:<PASS_DIR> | <KEY_FILE>:<PASS_FILE>[,<KEY_DIR>:<PASS_DIR> | <KEY_FILE>:<PASS_FILE>...]...
+# Directory or file to load the encrypted keystore file(s) and associated password file(s) from.
+# Keystore files must use the .json file extension, and password files must use the .txt file extension.
+# When specifying directories, Teku expects to find identically named keystore and password files.
+# For example validator_217179e.json and validator_217179e.txt.
+
+
+# teku_validator_keys: /keystore/{{ teku_keystore_file }}:/keystore/{{ teku_keystore_password_file }}
+teku_validator_keys: /keystore:/keystore
+
+# https://docs.teku.consensys.net/HowTo/Doppelganger-Detection
+teku_doppelganger_detection_enabled: false
+
+teku_enable_monitoring_endpoint: false
+teku_monitoring_endpoint_api_key: ""
+teku_monitoring_endpoint_machine_name: SlingNode
+teku_metrics_publish_endpoint: >-
+  https://beaconcha.in/api/v1/client/metrics?apikey=
+  {{ teku_monitoring_endpoint_api_key }}
+  &machine={{ teku_monitoring_endpoint_machine_name }}

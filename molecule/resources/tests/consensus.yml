@@ -1,0 +1,11 @@
+---
+- name: Get consensus container info
+  community.docker.docker_container_info:
+    name: consensus
+  register: consensus_container
+
+
+- name: Assert client containers are running
+  ansible.builtin.assert:
+    that:
+      - consensus_container.container.State.Status == "running"

@@ -1,0 +1,164 @@
+clients:
+  execution: geth
+  consensus: lighthouse
+  validator: lighthouse
+
+deploy_execution: true
+deploy_consensus: true
+deploy_validator: true
+
+network: goerli
+
+blockchain_root_path: /opt/blockchain
+
+blockchain_docker_compose_path: "{{ blockchain_root_path }}/blockchain_dc"
+
+container_name_consensus: consensus
+container_name_execution: execution
+container_name_validator: validator
+
+jwt_secret_path: "{{ blockchain_root_path }}/jwt"
+
+blockchain_dir_paths:
+  - "{{ blockchain_root_path }}"
+  - "{{ blockchain_root_path }}/scripts"
+  - "{{ blockchain_docker_compose_path }}"
+
+jwt_secret_file: jwt.hex
+recreate_jwt: false
+
+packages:
+  - python3-pip
+  - openssl   # Required to generate tokens and certifcates
+
+python_modules:
+  - pip>=21.3.1 # pip must be the first module to be installed
+  - setuptools_rust
+  - cryptography
+  - pyopenssl
+  - docker
+  - docker-compose
+
+# When enabled the role will install firewall package and add the required rules
+enable_firewall: true
+
+# when enable_firewall: true, ssh port will be allowed, override this variable if you use a custom port
+ssh_port: 22
+
+# Set to false to not allow SSH - you may be locked out of your server
+allow_ssh: true
+
+# Set this variable in your Playbook to the desired JWT secret. See TODO: link to our docks
+# If unset the role will generate a random secret, this will work if you deploy execution and consensus
+# on a single node. If you deploy on separate nodes you need to set this to the common value.
+# jwt_secret_string: "{{ undef(hint='Set this variable to the value of your JWT token') }}"
+
+execution_client_user:
+  user: execution_client
+  uid: 59284
+
+execution_client_group:
+  group: execution_client
+  gid: 59284
+
+consensus_client_group:
+  group: consensus_client
+  gid: 49284
+
+consensus_client_user:
+  user: consensus_client
+  uid: 49284
+
+validator_client_group:
+  group: validator_client
+  gid: 39284
+
+validator_client_user:
+  user: validator_client
+  uid: 39284
+
+jwt_secret_access_group:
+  group: jwt_secret_access_group
+  gid: 29284
+
+# execution client vars
+
+execution_client_p2p_port: 30303
+execution_client_json_rpc_port: 8545
+execution_client_authrpc_port: 8551
+execution_client_json_rpc_websocket_port: 8546
+execution_client_metrics_port: 6060
+
+execution_client_json_rpc_websocket_enabled: false
+
+execution_client_metrics_enabled: true
+
+
+# Setting this to true will map container ports to the hosts localhost socket, i.e. 127.0.0.1:8545.
+# You will need to use SSH tunnel or a reverse proxy to be able to connect from other hosts.
+# Client peer to peer ports are always mapped to 0.0.0.0
+expose_execution_client_json_rpc_port_to_host: false
+expose_execution_client_authrpc_port_to_host: false
+expose_execution_client_json_rpc_websocket_port_to_host: false
+expose_execution_client_metrics_port_to_host: false
+
+
+# consensus client vars
+
+execution_endpoint_authenticated: http://execution:{{ execution_client_authrpc_port }}
+
+consensus_client_p2p_port: 9000
+consensus_client_p2p_udp_port: 9000
+consensus_client_http_port: 5052
+consensus_client_metrics_port: 8008
+consensus_client_metrics_enabled: true
+
+# Setting this to true will map container ports to the hosts localhost socket, i.e. 127.0.0.1:8545.
+# You will need to use SSH tunnel or a reverse proxy to be able to connect from other hosts.
+# Client peer to peer ports are always mapped to 0.0.0.0
+expose_consensus_client_http_port_to_host: false
+expose_consensus_client_metrics_port_to_host: false
+
+# Checkpoint sync
+# Public endpoints https://eth-clients.github.io/checkpoint-sync-endpoints/
+consensus_checkpoint_sync_enabled: true
+consensus_checkpoint_sync_url: https://sync-goerli.beaconcha.in
+
+
+# validator client vars
+
+# Default beacon node endpoint for Lighthouse, Nimbus, Teku
+# NOTE: Prysm needs to be configured separately, see defaults/main/prysm.yml
+# Lighthouse and Teku can point to multiple beacon nodes for redundancy
+# specify them in a comma separated list for example:
+#   beacon_node: "http://consensus:{{ consensus_client_http_port }},http://conensus_node2:{{ consensus_client_http_port }}"
+#
+# See documentation:
+#   Lighthouse ->  https://lighthouse-book.sigmaprime.io/redundancy.html?highlight=beacon-node#redundancy
+#   Teku ->  https://docs.teku.consensys.net/Reference/CLI/Subcommands/Validator-Client#beacon-node-api-endpoint-beacon-node-api-endpoints
+beacon_node: "http://consensus:{{ consensus_client_http_port }}"
+
+validator_client_metrics_enabled: true
+validator_client_metrics_port: 8009
+
+suggested_fee_recipient: "0xa10214731A6D9eC03d36d1437796D1cEe6a061f7"
+graffiti: SlingNode.com
+
+validator_api_enabled: false
+validator_api_port: 7500
+
+# Setting this to true will map container ports to the hosts localhost socket, i.e. 127.0.0.1:8545.
+# You will need to use SSH tunnel or a reverse proxy to be able to connect from other hosts.
+# Client peer to peer ports are always mapped to 0.0.0.0
+expose_validator_client_metrics_port_to_host: false
+expose_validator_api_port_to_host: false
+
+
+# By default ports exposed to host (i.e. expose_consensus_client_http_port_to_host) are bound to 127.0.0.1. This means that in order to access them
+# from other hosts a reverse proxu or SSH tunnles must be used. If you want to access the ports without the need for reverse proxy
+# set this variable to 0.0.0.0.
+# NOTE: This should be used with caution and only when running behind a network firewall (or a secrutiy group).
+# You should never change this on hosts directly exposed to the internet since the host firewall (firewalld or ufw)
+# do not control access to ports managed by docker. For details see https://docs.docker.com/network/iptables/.
+# See documenation for more details: TODO: link to our docs
+host_ip_address_to_bind_to: 127.0.0.1

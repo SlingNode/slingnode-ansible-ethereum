@@ -1,0 +1,91 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|consensus|teku|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  consensus:
+    container_name: "{{ container_name_consensus }}"
+    image: {{ teku_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp:exec
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 1m
+    user: "{{ consensus_client_user.uid}}:{{ consensus_client_group.gid }}"
+    group_add:
+      - "{{ jwt_secret_access_group.gid }}"
+    environment:
+      JAVA_OPTS: "{{ teku_java_opts }}"
+    volumes:
+      - {{ blockchain_root_path }}/consensus/teku:{{ teku_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ jwt_secret_path }}/{{ jwt_secret_file }}:/jwt/{{ jwt_secret_file }}:ro
+    ports:
+      - {{ consensus_client_p2p_port }}:{{ consensus_client_p2p_port }}/tcp
+      - {{ consensus_client_p2p_port }}:{{ consensus_client_p2p_port }}/udp
+{% if expose_consensus_client_http_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ consensus_client_http_port }}:{{ consensus_client_http_port }}/tcp
+{% endif %}
+{% if expose_consensus_client_metrics_port_to_host|bool == True and consensus_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ consensus_client_metrics_port }}:{{ consensus_client_metrics_port }}/tcp
+{% endif %}
+{% if expose_consensus_client_http_port_to_host|bool == False or expose_consensus_client_metrics_port_to_host|bool == False %}
+    expose:
+{% if expose_consensus_client_http_port_to_host|bool == False %}
+      - {{ consensus_client_http_port }}
+{% endif %}
+{% if expose_consensus_client_metrics_port_to_host|bool == False and consensus_client_metrics_enabled|bool == True  %}
+      - {{ consensus_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "teku"
+      slingnode_layer: "consensus"
+    command:
+      - --data-path={{ teku_data_dir }}
+      - --log-destination=CONSOLE
+      - --network={{ network }}
+      - --ee-endpoint={{ execution_endpoint_authenticated }}
+      - --ee-jwt-secret-file=/jwt/{{ jwt_secret_file }}
+      - --eth1-deposit-contract-max-request-size=1000
+      - --p2p-port={{ consensus_client_p2p_port }}
+      - --p2p-peer-upper-bound={{ teku_p2p_peer_upper_bound }}
+      - --p2p-peer-lower-bound={{ teku_p2p_peer_lower_bound }}
+      - --logging={{ teku_log_level }}
+      - --rest-api-host-allowlist={{ teku_rest_api_host_allowlist  }}
+      - --rest-api-enabled={{ teku_rest_api_enabled | string | lower }}
+      - --rest-api-interface=0.0.0.0
+      - --rest-api-port={{ consensus_client_http_port }}
+{% if consensus_client_metrics_enabled|bool == True  %}
+      - --metrics-enabled=true
+      - --metrics-port={{ consensus_client_metrics_port }}
+      - --metrics-interface=0.0.0.0
+      - --metrics-host-allowlist={{ teku_metrics_host_allowlist }}
+{% endif %}
+{% if consensus_checkpoint_sync_enabled|bool == True %}
+      - --initial-state={{ consensus_checkpoint_sync_url }}
+{% endif %}
+      - --validators-proposer-default-fee-recipient={{ suggested_fee_recipient }}
+      - --beacon-liveness-tracking-enabled={{ teku_doppelganger_detection_enabled | string | lower }}
+{% if teku_enable_monitoring_endpoint|bool == True %}
+      - --metrics-publish-endpoint={{ teku_metrics_publish_endpoint }}
+{% endif %}
+
+
+
+networks:
+  service_net:
+    name: service_net

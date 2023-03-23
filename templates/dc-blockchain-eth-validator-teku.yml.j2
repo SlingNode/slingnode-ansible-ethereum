@@ -1,0 +1,87 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|validator|teku|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  validator:
+    container_name: "{{ container_name_validator }}"
+    image: {{ teku_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp:exec
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 1m
+    user: "{{ validator_client_user.uid}}:{{ validator_client_group.gid }}"
+    environment:
+      JAVA_OPTS: "{{ teku_java_opts }}"
+    volumes:
+      - {{ blockchain_root_path }}/validator/teku:{{ teku_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ blockchain_root_path }}/validator/keystore:/keystore:ro
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+    ports:
+{% if expose_validator_api_port_to_host|bool == True and validator_api_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_api_port }}:{{ validator_api_port }}/tcp
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_client_metrics_port }}:{{ validator_client_metrics_port }}/tcp
+{% endif %}
+{% endif %}
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
+    expose:
+{% if expose_validator_api_port_to_host|bool == False and validator_api_enabled|bool == True %}
+      - {{ validator_api_port }}
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True  %}
+      - {{ validator_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "teku"
+      slingnode_layer: "validator"
+    command:
+      - validator-client
+      - --beacon-node-api-endpoints={{ beacon_node }}
+      - --data-path={{ teku_data_dir }}
+      - --log-destination=CONSOLE
+      - --logging={{ teku_log_level }}
+      - --network={{ network }}
+      - --validator-keys={{ teku_validator_keys }}
+      - --validators-graffiti={{ graffiti }}
+      - --validators-early-attestations-enabled={{ teku_validators_early_attestations_enabled | string | lower }}
+{% if validator_api_enabled|bool == True  %}
+      - --validator-api-enabled=true
+      - --validator-api-interface=0.0.0.0
+      - --validator-api-port={{ validator_api_port }}
+      - --validator-api-host-allowlist={{ teku_validator_api_host_allowlist }}
+      - --validator-api-cors-origins={{ teku_validator_api_cors_origins }}
+      - --validator-api-keystore-file={{ teku_data_dir }}/validator_api_key.keystore
+      - --validator-api-keystore-password-file={{ teku_data_dir }}/validator_api_key.password
+{% endif %}
+      - --validators-proposer-default-fee-recipient={{ suggested_fee_recipient }}
+      - --validators-keystore-locking-enabled={{ teku_validators_keystore_locking_enabled | string | lower }}
+      - --doppelganger-detection-enabled={{ teku_doppelganger_detection_enabled | string | lower }}
+{% if validator_client_metrics_enabled|bool == True  %}
+      - --metrics-enabled=true
+      - --metrics-port={{ validator_client_metrics_port }}
+      - --metrics-interface=0.0.0.0
+      - --metrics-host-allowlist={{ teku_metrics_host_allowlist }}
+{% endif %}
+
+
+networks:
+  service_net:
+    name: service_net

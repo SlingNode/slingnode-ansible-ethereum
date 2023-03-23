@@ -1,0 +1,100 @@
+---
+# Configure firewall rules for RedHat based OS
+- name: Allow required connectivity for execution client Redhat based
+  ansible.posix.firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - { port: "{{ execution_client_p2p_port }}/tcp" }
+    - { port: "{{ execution_client_p2p_port }}/udp" }
+  when: ansible_os_family == 'RedHat' and enable_firewall | bool
+
+
+- name: Allow required connectivity for execution client Redhat based for Erigon
+  ansible.posix.firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    state: enabled
+    permanent: true
+    immediate: true
+  loop:
+    - { port: "{{ erigon_torrent_port }}/tcp" }
+    - { port: "{{ erigon_torrent_port }}/udp" }
+  when: ansible_os_family == 'RedHat' and clients.execution == "erigon" and enable_firewall | bool
+
+
+# Configure firewall rules for Debian based OS
+- name: Allow required connectivity for execution client Debian based
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ execution_client_p2p_port }}", proto: tcp, rule: allow }
+    - { port: "{{ execution_client_p2p_port }}", proto: udp, rule: allow }
+  when: ansible_os_family == 'Debian' and enable_firewall | bool
+
+
+- name: Allow required connectivity for execution client Debian based for Erigon
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ erigon_torrent_port }}", proto: tcp, rule: allow }
+    - { port: "{{ erigon_torrent_port }}", proto: udp, rule: allow }
+  when: ansible_os_family == 'Debian' and clients.execution == "erigon" and enable_firewall | bool
+
+
+- name: Create execution client container group
+  ansible.builtin.group:
+    name: "{{ execution_client_group.group }}"
+    gid: "{{ execution_client_group.gid }}"
+    state: present
+
+
+- name: Create execution client container user
+  ansible.builtin.user:
+    name: "{{ execution_client_user.user }}"
+    uid: "{{ execution_client_user.uid }}"
+    group: "{{ execution_client_group.group }}"
+    home: /dev/null
+    password_lock: true
+    shell: /sbin/nologin
+    groups:
+      - "{{ jwt_secret_access_group.group }}"
+    state: present
+
+
+# Nethermind by default creates this dir in /nethermind, when running as non-root it doesn't have permissions and fails
+# see https://github.com/NethermindEth/nethermind/issues/3510, https://github.com/NethermindEth/nethermind/issues/4305
+- name: Create required directories - Nethermind fix
+  ansible.builtin.file:
+    path: "{{ blockchain_root_path }}/execution/nethermind/Nethermind"
+    state: directory
+    owner: "{{ execution_client_user.user }}"
+    group: "{{ execution_client_group.group }}"
+    mode: "0700"
+  when: clients.execution == "nethermind"
+
+
+- name: Create execution client directory
+  ansible.builtin.file:
+    path: "{{ blockchain_root_path }}/execution/{{ clients.execution }}"
+    state: directory
+    owner: "{{ execution_client_user.user }}"
+    group: "{{ execution_client_group.group }}"
+    mode: "0700"
+
+
+- name: Copy docker-compose files for execution client
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0600'
+  loop:
+    - src: dc-blockchain-eth-execution-{{ clients.execution }}.yml.j2
+      dest: "{{ blockchain_docker_compose_path }}/dc-blockchain-eth-execution-{{ clients.execution }}.yml"

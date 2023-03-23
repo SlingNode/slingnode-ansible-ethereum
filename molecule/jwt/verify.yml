@@ -1,0 +1,17 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: Include test tasks - Containers are running
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/all_clients.yml
+
+
+    - name: Include test tasks - Provided JWT exists
+      ansible.builtin.include_tasks:
+        file: ../resources/tests/jwt_exists.yml

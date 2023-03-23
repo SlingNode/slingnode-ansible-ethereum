@@ -1,0 +1,42 @@
+---
+argument_specs:
+  main:
+    short_description: The main entry point for the slingnode.ethereum role.
+    options:
+      clients:
+        type: "dict"
+        required: true
+        options:
+          execution:
+            type: "str"
+            required: false
+            choices:
+              - geth
+              - nethermind
+              - besu
+              - erigon
+          consensus:
+            type: "str"
+            required: false
+            choices:
+              - lighthouse
+              - prysm
+              - teku
+              - nimbus
+          validator:
+            type: "str"
+            required: false
+            choices:
+              - lighthouse
+              - prysm
+              - teku
+              - nimbus
+      deploy_execution:
+        type: "bool"
+        required: true
+      deploy_consensus:
+        type: "bool"
+        required: true
+      deploy_validator:
+        type: "bool"
+        required: true

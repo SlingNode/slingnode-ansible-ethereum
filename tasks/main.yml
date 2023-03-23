@@ -1,0 +1,148 @@
+---
+- name: Gather os specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_os_family }}.yml"
+
+
+- name: Install required software packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "{{ packages }}"
+    - "{{ os_specific_packages | default([]) }}"
+
+
+- name: Install firewall required software packages
+  ansible.builtin.package:
+    name: "{{ firewall_package }}"
+    state: present
+  when: enable_firewall | bool
+
+
+- name: Allow SSH - Redhat based
+  ansible.posix.firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    state: enabled
+    permanent: true
+  loop:
+    - { port: "{{ ssh_port }}/tcp" }
+  when: ansible_os_family == 'RedHat' and enable_firewall and allow_ssh | bool
+
+
+- name: Enable firewallD
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_os_family == 'RedHat' and enable_firewall | bool
+  notify:
+    - Restart docker service
+
+
+- name: Allow SSH - Debian based
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ ssh_port }}", proto: tcp, rule: allow }
+  when: ansible_os_family == 'Debian' and enable_firewall and allow_ssh | bool
+
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+  when: ansible_os_family == 'Debian' and enable_firewall | bool
+  notify:
+    - Restart docker service
+
+
+- name: Execute the handler now
+  ansible.builtin.meta: flush_handlers
+
+
+- name: Install requried Python modules
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3
+    state: present
+  loop: "{{ python_modules }}"
+
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0600"
+    state: directory
+  loop: "{{ blockchain_dir_paths }}"
+
+
+- name: Include JWT secret creation tasks
+  ansible.builtin.include_tasks:
+    file: jwt_secret.yml
+  when: deploy_execution or deploy_consensus | bool
+
+
+- name: Find all pre-existing docker compose files to cleanup
+  ansible.builtin.find:
+    paths: "{{ blockchain_docker_compose_path }}"
+    patterns: "*.yml"
+    recurse: true
+  register: cleanup_docker_compose_files
+  ignore_errors: true
+
+
+- name: Remove all pre-existing docker compose files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ cleanup_docker_compose_files.files }}"
+
+
+- name: Include execution client deployment tasks
+  ansible.builtin.include_tasks:
+    file: execution.yml
+  when: deploy_execution | bool
+
+
+- name: Include consensus client deployment tasks
+  ansible.builtin.include_tasks:
+    file: consensus.yml
+  when: deploy_consensus | bool
+
+
+- name: Include validator deployment tasks
+  ansible.builtin.include_tasks:
+    file: validator.yml
+  when: deploy_validator | bool
+
+
+# Generate a list of docker-compose files to start the stack
+- name: Find all docker-compose files
+  ansible.builtin.find:
+    paths: "{{ blockchain_docker_compose_path }}"
+    patterns: "*.yml"
+    recurse: true
+  register: docker_compose_files
+
+
+- name: Start blockchain stack
+  community.docker.docker_compose:
+    project_src: "{{ blockchain_docker_compose_path }}"
+    files: "{{ docker_compose_files.files | map(attribute='path') | list }}"
+    remove_orphans: true
+
+
+- name: Copy scripts
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0700'
+  loop:
+    - src: prune_execution_client.py
+      dest: "{{ blockchain_root_path }}/scripts/prune_execution_client.py"
+  when: clients.execution == "geth" or clients.execution == "nethermind"

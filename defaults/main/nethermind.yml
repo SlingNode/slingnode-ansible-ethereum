@@ -1,0 +1,18 @@
+---
+nethermind_docker_image: nethermind/nethermind:1.17.2
+nethermind_data_dir: /var/lib/nethermind
+nethermind_maxpeers: 50
+
+nethermind_json_rpc_enabled: true
+nethermind_health_checks_uienabled: true
+nethermind_health_checks_enabled: true
+# https://docs.nethermind.io/nethermind/ethereum-client/configuration/jsonrpc
+nethermind_json_rpc_enabled_modules: "Eth,Subscribe,Trace,TxPool,Web3,Personal,Proof,Net,Parity,Health,Rpc,Admin"
+
+nethermind_log_level: INFO  # ERROR, WARN, INFO, DEBUG, TRACE
+nethermind_sync_snapsync: true
+# https://docs.nethermind.io/nethermind/ethereum-client/configuration/pruning
+nethermind_pruning_full_pruning_max_degree_of_parallelism: 1
+
+execution_client_metrics_enabled: true
+nethermind_metrics_intervalseconds: 5

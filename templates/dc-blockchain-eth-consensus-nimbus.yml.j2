@@ -1,0 +1,83 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|consensus|nimbus|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  consensus:
+    container_name: "{{ container_name_consensus }}"
+    image: {{ nimbus_docker_image_beacon }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 1m
+    user: "{{ consensus_client_user.uid}}:{{ consensus_client_group.gid }}"
+    group_add:
+      - "{{ jwt_secret_access_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/consensus/nimbus:{{ nimbus_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+      - {{ jwt_secret_path }}/{{ jwt_secret_file }}:/jwt/{{ jwt_secret_file }}:ro
+    ports:
+      - {{ consensus_client_p2p_port }}:{{ consensus_client_p2p_port }}/tcp
+      - {{ consensus_client_p2p_port }}:{{ consensus_client_p2p_port }}/udp
+{% if expose_consensus_client_http_port_to_host|bool == True  %}
+      - {{ host_ip_address_to_bind_to }}:{{ consensus_client_http_port }}:{{ consensus_client_http_port }}/tcp
+{% endif %}
+{% if expose_consensus_client_metrics_port_to_host|bool == True and consensus_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ consensus_client_metrics_port }}:{{ consensus_client_metrics_port }}/tcp
+{% endif %}
+{% if expose_consensus_client_http_port_to_host|bool == False or expose_consensus_client_metrics_port_to_host|bool == False %}
+    expose:
+{% if expose_consensus_client_http_port_to_host|bool == False %}
+      - {{ consensus_client_http_port }}
+{% endif %}
+{% if expose_consensus_client_metrics_port_to_host|bool == False and consensus_client_metrics_enabled|bool == True  %}
+      - {{ consensus_client_metrics_port }}
+{% endif %}
+{% endif %}
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "nimbus"
+      slingnode_layer: "consensus"
+    command:
+      - --data-dir={{ nimbus_data_dir }}
+      - --non-interactive
+      - --status-bar=false
+      - --tcp-port={{ consensus_client_p2p_port }}
+      - --udp-port={{ consensus_client_p2p_port }}
+      - --max-peers={{ nimbus_max_peers }}
+      - --network={{ network }}
+      - --web3-url={{ execution_endpoint_authenticated }}
+      - --jwt-secret=/jwt/{{ jwt_secret_file }}
+      - --log-level={{ nimbus_log_level }}
+      - --log-format=json
+      - --rest
+      - --rest-address=0.0.0.0
+      - --rest-port={{ consensus_client_http_port }}
+      - --enr-auto-update={{ nimbus_enr_auto_update | string | lower }}
+{% if consensus_client_metrics_enabled|bool == True  %}
+      - --metrics
+      - --metrics-port={{ consensus_client_metrics_port }}
+      - --metrics-address=0.0.0.0
+      - --validator-monitor-totals
+{% endif %}
+      - --suggested-fee-recipient={{ suggested_fee_recipient }}
+      - --in-process-validators=false
+
+
+networks:
+  service_net:
+    name: service_net

@@ -1,0 +1,82 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements_dev.yml
+    requirements-file: requirements.yml
+
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: false
+  cachier: machine
+  parallel: true
+  default_box: '${SLINGNODE_BOX:-generic/ubuntu2204}'
+
+
+platforms:
+  - name: instance
+    hostname: slingnode-test-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 10240
+    cpus: 4
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_PIPELINING: "True"
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    prepare: ../resources/playbooks/prepare.yml
+  inventory:
+    group_vars:
+      all:
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
+
+        expose_execution_client_json_rpc_port_to_host: true
+        expose_execution_client_authrpc_port_to_host: true
+        expose_execution_client_json_rpc_websocket_port_to_host: true
+        expose_execution_client_metrics_port_to_host: true
+        expose_consensus_client_http_port_to_host: true
+        expose_consensus_client_metrics_port_to_host: true
+        expose_validator_client_metrics_port_to_host: true
+        expose_validator_api_port_to_host: true
+        validator_api_enabled: true
+        expose_prysm_rpc_port_to_host: true
+        # # consensus_checkpoint_sync_url: https://prater.checkpoint.sigp.io
+        # consensus_checkpoint_sync_enabled: true
+
+
+verifier:
+  name: ansible
+
+
+scenario:
+  name: expose_ports
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
