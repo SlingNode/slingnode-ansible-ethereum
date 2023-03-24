@@ -36,7 +36,7 @@ git branch feature/no-ref/refactor-consensus-tasks
 They should begin with on of the three below prefixes, be short and descriptive. We like keeping it simple.
 
 ```sh
-git commit -m 'feat: add support Teku consensus and validator'
+git commit -m 'feat: add support for Teku consensus and validator'
 git commit -m 'fix: update type in geth docker compose template'
 git commit -m 'refactor: refactor execution deployment tasks'
 ```

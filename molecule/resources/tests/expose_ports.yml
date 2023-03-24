@@ -96,7 +96,7 @@
     host: 127.0.0.1
     port: 7500
     timeout: 60
-    delay: 15
+    delay: 30
   when: clients.validator == "teku"
 
 

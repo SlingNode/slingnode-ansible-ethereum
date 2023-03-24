@@ -20,6 +20,6 @@
 
 
   tasks:
-    - name: "Include blockchain"
+    - name: "Include ethereum"
       ansible.builtin.include_role:
-        name: "blockchain"
+        name: "slingnode-ansible-ethereum"

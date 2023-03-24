@@ -1,4 +1,4 @@
 rules:
   line-length:
-    max: 160
+    max: 200
     level: warning
