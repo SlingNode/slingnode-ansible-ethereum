@@ -108,9 +108,7 @@
 
     - name: GET execution_client_metrics_port
       ansible.builtin.uri:
-        url: >-
-          "http://{{ hostvars['slingnode-execution-01']['ansible_host'] }}
-          :6060{{ '/metrics' if clients.execution == 'nethermind' or clients.execution == 'besu' else '/debug/metrics/prometheus' }}"
+        url: "http://{{ hostvars['slingnode-execution-01']['ansible_host'] }}:6060{{ '/metrics' if clients.execution == 'nethermind' or clients.execution == 'besu' else '/debug/metrics/prometheus' }}"
         method: GET
       register: execution_client_metrics_port_response
 

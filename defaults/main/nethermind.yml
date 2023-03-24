@@ -1,5 +1,5 @@
 ---
-nethermind_docker_image: nethermind/nethermind:1.17.2
+nethermind_docker_image: nethermind/nethermind:1.17.3
 nethermind_data_dir: /var/lib/nethermind
 nethermind_maxpeers: 50
 
