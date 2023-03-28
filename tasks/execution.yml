@@ -98,3 +98,14 @@
   loop:
     - src: dc-blockchain-eth-execution-{{ clients.execution }}.yml.j2
       dest: "{{ blockchain_docker_compose_path }}/dc-blockchain-eth-execution-{{ clients.execution }}.yml"
+
+
+- name: Copy prunning script
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0700'
+  loop:
+    - src: prune_execution_client.py
+      dest: "{{ blockchain_root_path }}/scripts/prune_execution_client.py"
+  when: clients.execution == "geth" or clients.execution == "nethermind"

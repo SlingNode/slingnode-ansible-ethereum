@@ -122,7 +122,7 @@ expose_consensus_client_metrics_port_to_host: false
 # Checkpoint sync
 # Public endpoints https://eth-clients.github.io/checkpoint-sync-endpoints/
 consensus_checkpoint_sync_enabled: true
-consensus_checkpoint_sync_url: https://sync-goerli.beaconcha.in
+consensus_checkpoint_sync_url: https://beaconstate-goerli.chainsafe.io
 
 
 # validator client vars

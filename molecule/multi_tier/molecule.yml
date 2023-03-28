@@ -75,10 +75,6 @@ provisioner:
   inventory:
     group_vars:
       all:
-        clients:
-          execution: ${SLINGNODE_EXECUTION:-geth}
-          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
-          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
         suggested_fee_recipient: "0xa10214731A6D9eC03d36d1437796D1cEe6a061f7"
         graffiti: SlingNode.com
         jwt_secret_string: "7a813d06b0a08de1f1e70ebbc6b3ec8dc589f62d04d346b4754c9d739b4c648b"
@@ -86,6 +82,8 @@ provisioner:
         enable_firewall: false
     host_vars:
       slingnode-execution-01:
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
         deploy_execution: true
         deploy_consensus: false
         deploy_validator: false
@@ -93,6 +91,12 @@ provisioner:
         expose_execution_client_json_rpc_port_to_host: true
         expose_execution_client_metrics_port_to_host: true
       slingnode-consensus-01:
+        clients:
+          # Including whole clients dict in vars for consensus to enable the verfiy tasks
+          # execution and validator endpoints are called from consensus node
+          execution: ${SLINGNODE_EXECUTION:-geth}
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
         deploy_execution: false
         deploy_consensus: true
         deploy_validator: false
@@ -101,6 +105,8 @@ provisioner:
         expose_consensus_client_metrics_port_to_host: true
         expose_prysm_rpc_port_to_host: true
       slingnode-validator-01:
+        clients:
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
         deploy_execution: false
         deploy_consensus: false
         deploy_validator: true
