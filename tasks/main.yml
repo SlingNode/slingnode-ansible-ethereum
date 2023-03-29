@@ -135,14 +135,3 @@
     project_src: "{{ blockchain_docker_compose_path }}"
     files: "{{ docker_compose_files.files | map(attribute='path') | list }}"
     remove_orphans: true
-
-
-- name: Copy scripts
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    mode: '0700'
-  loop:
-    - src: prune_execution_client.py
-      dest: "{{ blockchain_root_path }}/scripts/prune_execution_client.py"
-  when: clients.execution == "geth" or clients.execution == "nethermind"

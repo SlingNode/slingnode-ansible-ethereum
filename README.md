@@ -50,7 +50,7 @@ Debian based:
 
 # Documentation
 
-The README file provides a basic overview only. Full documentation describing the role in details is available at [https://slingnode.gitbook.io/slingnode.ethereum/](https://slingnode.gitbook.io/slingnode.ethereum/).
+The README file provides a basic overview only. Full documentation describing the role in details is available at [https://docs.slingnode.com/slingnode.ethereum/](https://docs.slingnode.com/slingnode.ethereum/).
 
 # Requirements
 
@@ -112,7 +112,7 @@ By default set to true, the role will make sure the firewall package is installe
 enable_firewall: true
 ```
 
-This is meant to be a safe default for anyone who uses the role to deploy on a server that is directly exposed to the internet (for example an OVH bare metal server). It is expected that for more enterprise type of deployments this would be set to false. Refer to [Host firewall](https://slingnode.gitbook.io/slingnode.ethereum/architecture/security#host-firewall) section for details and notes on SSH port.
+This is meant to be a safe default for anyone who uses the role to deploy on a server that is directly exposed to the internet (for example an OVH bare metal server). It is expected that for more enterprise type of deployments this would be set to false. Refer to [Host firewall]https://docs.slingnode.com/slingnode.ethereum/architecture/security#host-firewall) section for details and notes on SSH port.
 
 **network**
 
@@ -130,7 +130,7 @@ Enable/disable consensus client checkpoint sync feature. Defaults to "true" (syn
 consensus_checkpoint_sync_enabled: true
 ```
 
-Refer to [Checkpoint sync](https://slingnode.gitbook.io/slingnode.ethereum/checkpoint-sync) section for details.
+Refer to [Checkpoint sync](https://docs.slingnode.com/slingnode.ethereum/checkpoint-sync) section for details.
 
 **consensus\_checkpoint\_sync\_url**
 
@@ -140,7 +140,7 @@ Beacon endpoint to sync from. This needs to match the network you are deploying 
 consensus_checkpoint_sync_url: https://sync-goerli.beaconcha.in
 ```
 
-Refer to [Checkpoint sync](https://slingnode.gitbook.io/slingnode.ethereum/checkpoint-sync) section for details.
+Refer to [Checkpoint sync](https://docs.slingnode.com/slingnode.ethereum/checkpoint-sync) section for details.
 
 **suggested\_fee\_recipient**
 
@@ -172,9 +172,14 @@ Sample Playbook:
     suggested_fee_recipient: "0xa10214731A6D9eC03d36d1437796D1cEe6a061f7"
     graffiti: SlingNode.com
 
+
   roles:
-    - geerlingguy.docker
-    - slingnode.ethereum
+    - role: geerlingguy.docker
+      vars:
+        docker_package_state: present
+        docker_install_compose_plugin: true
+
+    - role: slingnode.ethereum
 ```
 
 # License
