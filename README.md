@@ -164,7 +164,7 @@ Sample Playbook:
 
 ```yaml
 ---
-- name: Deploy ehtereum stack - whole stack per node - default clients (geth & lighthouse)
+- name: Deploy ethereum stack - whole stack per node - default clients (geth & lighthouse)
   hosts: all
   become: true
 
