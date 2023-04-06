@@ -33,7 +33,7 @@ git branch feature/no-ref/refactor-consensus-tasks
 
 ### Commit messages
 
-They should begin with on of the three below prefixes, be short and descriptive. We like keeping it simple.
+They should begin with one of the three below prefixes, be short and descriptive. We like keeping it simple.
 
 ```sh
 git commit -m 'feat: add support for Teku consensus and validator'
