@@ -153,6 +153,8 @@ validator_api_port: 7500
 expose_validator_client_metrics_port_to_host: false
 expose_validator_api_port_to_host: false
 
+host_keystore_dir: "{{ blockchain_root_path }}/validator/keystore"
+container_keystore_dir: /keystore
 
 # By default ports exposed to host (i.e. expose_consensus_client_http_port_to_host) are bound to 127.0.0.1. This means that in order to access them
 # from other hosts a reverse proxu or SSH tunnles must be used. If you want to access the ports without the need for reverse proxy

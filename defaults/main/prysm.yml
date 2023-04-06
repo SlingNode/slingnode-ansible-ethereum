@@ -19,7 +19,8 @@ prysm_web: true
 
 prysm_grpc_gateway_corsdomain: "*"
 prysm_wallet_dir: /var/lib/prysm
-prysm_wallet_password_file: /keystore/prysm_wallet_pass.txt
+prysm_wallet_file_name: prysm_wallet_pass.txt
+prysm_wallet_password_file: "{{ prysm_wallet_dir }}/{{ prysm_wallet_file_name }}"
 prysm_beacon_rpc_provider: consensus:{{ prysm_rpc_port }}
 prysm_beacon_rpc_gateway_provider: consensus:{{ consensus_client_http_port }}
 

@@ -80,10 +80,6 @@ services:
 {% endif %}
       - --validators-proposer-default-fee-recipient={{ suggested_fee_recipient }}
       - --beacon-liveness-tracking-enabled={{ teku_doppelganger_detection_enabled | string | lower }}
-{% if teku_enable_monitoring_endpoint|bool == True %}
-      - --metrics-publish-endpoint={{ teku_metrics_publish_endpoint }}
-{% endif %}
-
 
 
 networks:
