@@ -45,7 +45,7 @@ teku_keystore_password_file: ""
 
 
 # teku_validator_keys: /keystore/{{ teku_keystore_file }}:/keystore/{{ teku_keystore_password_file }}
-teku_validator_keys: /keystore:/keystore
+teku_validator_keys: "{{ container_keystore_dir }}:{{ container_keystore_dir }}"
 
 # https://docs.teku.consensys.net/HowTo/Doppelganger-Detection
 teku_doppelganger_detection_enabled: false

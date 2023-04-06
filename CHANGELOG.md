@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2023-04-06
+
+### Changed
+
+- Replaced hardcoded /keystore path with a variable  (container_keystore_dir)
+- Replaced hardcoded /keystore with container_keystore_dir in Teku validator Docker compose template
+- Changed prysm_wallet_file_name from fixed path to a variable
+- Changed location of prysm_wallet_file from /keystore dir to the data dir
+- Change teku_validator_keys variable from fixed path to variables (no change on location)
+
+### Fixed
+
+- Moved --metrics-publish-endpoint from Teku consensus client to validator client
+- Added task to reset file permissions on SSL keystore for Teku validator client
+
 ## [0.3.0] - 2023-03-28
 
 ### Changed

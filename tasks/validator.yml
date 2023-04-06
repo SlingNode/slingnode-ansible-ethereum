@@ -17,7 +17,7 @@
     state: present
 
 
-- name: Set validator client directory ownership and permissions
+- name: Create validator client directory and set ownership and permissions
   ansible.builtin.file:
     path: "{{ blockchain_root_path }}/validator/{{ clients.validator }}"
     state: directory
@@ -51,6 +51,17 @@
   register: shell_command_output
   changed_when: shell_command_output.rc == 0
   when: clients.validator == "teku" and validator_api_enabled and not teku_validator_api_keystore.stat.exists or teku_recreate_validator_api_keystore | bool
+
+
+- name: Set permissions on the SSL keystore and certificate
+  ansible.builtin.file:
+    path: "{{ blockchain_root_path }}/validator/{{ clients.validator }}"
+    state: directory
+    owner: "{{ validator_client_user.user }}"
+    group: "{{ validator_client_group.group }}"
+    mode: '0700'
+    recurse: true
+  when: clients.validator == "teku" and validator_api_enabled
 
 
 - name: Restart validator container
