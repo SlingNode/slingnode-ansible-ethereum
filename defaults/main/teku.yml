@@ -54,6 +54,4 @@ teku_enable_monitoring_endpoint: false
 teku_monitoring_endpoint_api_key: ""
 teku_monitoring_endpoint_machine_name: SlingNode
 teku_metrics_publish_endpoint: >-
-  https://beaconcha.in/api/v1/client/metrics?apikey=
-  {{ teku_monitoring_endpoint_api_key }}
-  &machine={{ teku_monitoring_endpoint_machine_name }}
+ https://beaconcha.in/api/v1/client/metrics?apikey={{ teku_monitoring_endpoint_api_key }}&machine={{ teku_monitoring_endpoint_machine_name }}
