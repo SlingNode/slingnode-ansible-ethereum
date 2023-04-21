@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2023-04-20
+
+### Changed
+
+- Updated Nethermind image tag from 1.17.3 to 1.17.4
+- Updated Lighthouse image tag from v4.0.1-modern to v4.1.0-modern
+- Updated Prysm image tag from v4.0.2 to v4.0.3
+- Updated Geth image tag from v1.11.5 to v1.11.6
+
+-
 ## [0.5.0] - 2023-04-17
 
 ### Changed
