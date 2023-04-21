@@ -1,5 +1,5 @@
 ---
-lighthouse_docker_image: sigp/lighthouse:v4.1.0
+lighthouse_docker_image: sigp/lighthouse:v4.1.0-modern
 
 lighthouse_data_dir: /var/lib/lighthouse
 

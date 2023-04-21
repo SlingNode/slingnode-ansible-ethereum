@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated Nethermind image tag from 1.17.3 to 1.17.4
-- Updated Lighthouse image tag from v4.0.1-modern to v4.1.0
+- Updated Lighthouse image tag from v4.0.1-modern to v4.1.0-modern
 - Updated Prysm image tag from v4.0.2 to v4.0.3
 - Updated Geth image tag from v1.11.5 to v1.11.6
 
