@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated Nimbus image tag from v23.3.2 to v23.4.0
 - Updated Teku image tag from 23.3.1 to 23.4.0
+- Updated Erigon image tag from v2.42.0 to v2.43.0
+- Removed Erigon flag --externalcl
 
 
 ## [0.6.0] - 2023-04-20
@@ -22,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Prysm image tag from v4.0.2 to v4.0.3
 - Updated Geth image tag from v1.11.5 to v1.11.6
 
--
+
 ## [0.5.0] - 2023-04-17
 
 ### Changed
