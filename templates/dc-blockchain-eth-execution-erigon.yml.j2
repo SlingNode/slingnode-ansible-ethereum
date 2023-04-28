@@ -100,7 +100,6 @@ services:
       - --authrpc.port={{ execution_client_authrpc_port }}
       - --authrpc.vhosts={{ erigon_authrpc_vhosts }}
       - --authrpc.jwtsecret=/jwt/{{ jwt_secret_file }}
-      - --externalcl
       - --maxpeers={{ erigon_maxpeers }}
 
 
