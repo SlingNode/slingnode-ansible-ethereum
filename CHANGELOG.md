@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2023-05-09
+### Changed
+
+- Updated Ansible community.docker from 3.4.0 to 3.4.5
+- Updated Nethermind image tag from 1.17.4 to 1.18.0
+- Updated Besu image tag from 23.1.2 to 23.4.0
+- Removed Besu flag `besu_xbonsai_use_snapshots` - https://github.com/hyperledger/besu/pull/5337
+
 ## [0.7.0] - 2023-04-26
 
 ### Changed
