@@ -99,7 +99,6 @@ services:
       - --metrics-port={{ execution_client_metrics_port }}
 {% endif %}
       - --data-storage-format={{ besu_data_storage_format }}
-      - --Xbonsai-use-snapshots={{ besu_xbonsai_use_snapshots | string | lower }}
       - --sync-mode={{ besu_sync_mode }}
 {% if besu_graphql_http_enabled|bool == True %}
       - --graphql-http-enabled
