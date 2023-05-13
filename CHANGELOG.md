@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2023-05-13
+### Changed
+
+- Hotfix Prysm image tag from v4.0.3 to v4.0.3-hotfix - https://github.com/prysmaticlabs/prysm/releases/tag/v4.0.3-hotfix
+- Updated Teku image tag from 23.4.0 to 23.5.0
+- Fixed community.docker version in README
+
 ## [0.8.0] - 2023-05-09
 ### Changed
 
