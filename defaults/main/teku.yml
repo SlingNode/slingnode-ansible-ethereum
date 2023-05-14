@@ -1,5 +1,5 @@
 ---
-teku_docker_image: consensys/teku:23.4.0
+teku_docker_image: consensys/teku:23.5.0
 
 teku_java_opts: "-Xmx4g"
 teku_data_dir: /var/lib/teku

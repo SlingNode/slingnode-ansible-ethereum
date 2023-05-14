@@ -1,6 +1,6 @@
 ---
-prysm_docker_image_beacon: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
-prysm_docker_image_validator: gcr.io/prysmaticlabs/prysm/validator:v4.0.3
+prysm_docker_image_beacon: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3-hotfix
+prysm_docker_image_validator: gcr.io/prysmaticlabs/prysm/validator:v4.0.3-hotfix
 prysm_data_dir: /var/lib/prysm
 
 prysm_rpc_port: 4000
