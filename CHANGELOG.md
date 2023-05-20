@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2023-05-20
+### Changed
+
+- Updated Nimbus image tag from v23.5.0 to v23.5.1
+- Updated Erigon image tag from v2.43.0 to v2.43.1
+
+
 ## [0.10.0] - 2023-05-17
 ### Changed
 
