@@ -23,4 +23,10 @@ export SLINGNODE_EXECUTION=erigon SLINGNODE_CONSENSUS=nimbus SLINGNODE_VALIDATOR
 delimit
 SLINGNODE_BOX=almalinux/9 molecule test -s multi_tier
 
+delimit
+molecule test -s multi_tier
+
+export SLINGNODE_EXECUTION=besu SLINGNODE_CONSENSUS=lodestar SLINGNODE_VALIDATOR=lodestar
+
+
 unset SLINGNODE_EXECUTION SLINGNODE_CONSENSUS SLINGNODE_VALIDATOR
