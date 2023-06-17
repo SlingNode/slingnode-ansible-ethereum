@@ -1,0 +1,29 @@
+---
+lodestar_docker_image: chainsafe/lodestar:latest
+
+lodestar_data_dir: /var/lib/lodestar
+
+lodestar_target_peers: 50
+
+# --debug-level <LEVEL>
+# Specifies the verbosity level used when emitting logs to the terminal
+lodestar_log_level: info # possible values: info, debug, trace, warn, error, crit
+
+# In addition to outputing logs to the terminal lodestar creates a logfile
+# to which it logs at debug level. --logfile-max-number 0 disables the file logging.
+# See the bellow flags in lighthousse helo
+# --logfile-debug-level <LEVEL>
+# --logfile-max-number <COUNT>  |   If set to 0, background file logging is disabled.
+lodestar_logfile_max_number: 0
+
+# Validator vars
+
+lodestar_validator_http_allow_origin: "*"
+lodestar_enable_doppelganger_protection: false
+lodestar_enable_monitoring_endpoint: false
+lodestar_monitoring_endpoint_api_key: ""
+lodestar_monitoring_endpoint_machine_name: SlingNode
+lodestar_monitoring_endpoint: >-
+  https://beaconcha.in/api/v1/client/metrics?apikey=
+  {{ lodestar_monitoring_endpoint_api_key }}
+  &machine={{ lodestar_monitoring_endpoint_machine_name }}
