@@ -1,0 +1,61 @@
+{{ ansible_managed | comment }}
+version: "3.9"
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: 100m
+      max-file: "3"
+      tag: {% raw %}'blockchain|validator|lodestar|{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'{% endraw %}
+
+
+services:
+  validator:
+    container_name: "{{ container_name_validator }}"
+    image: {{ lodestar_docker_image }}
+    restart: on-failure:5
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - no-new-privileges
+    stop_grace_period: 1m
+    user: "{{ validator_client_user.uid}}:{{ validator_client_group.gid }}"
+    volumes:
+      - {{ blockchain_root_path }}/validator/lodestar:{{ lodestar_data_dir }}:rw
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - service_net
+    <<: *logging
+    labels:
+      slingnode_client: "lodestar"
+      slingnode_layer: "validator"
+    command:
+      - validator
+      - --dataDir={{ lodestar_data_dir }}
+      - --network={{ network }}
+      - --beaconNodes={{ beacon_node }}
+{% if validator_keymanager_enabled|bool == True  %}
+      - --keymanager=true
+      - --keymanager.address=0.0.0.0
+      - --keymanager.port={{ validator_api_port }}
+{% endif %}
+{% if lodestar_enable_doppelganger_protection|bool == True %}
+      - --doppelgangerProtectionEnabled=true
+{% endif %}
+{% if validator_client_metrics_enabled|bool == True  %}
+      - --metrics=true
+      - --metrics.address=0.0.0.0
+      - --metrics.port="{{ validator_client_metrics_port }}"
+{% endif %}
+      - --logLevel={{ lodestar_log_level }}
+      - --suggestedFeeRecipient={{ suggested_fee_recipient }}
+{% if lodestar_enable_monitoring_endpoint|bool == True %}
+      - --monitoring.endpoint={{ lodestar_monitoring_endpoint }}
+{% endif %}
+
+
+networks:
+  service_net:
+    name: service_net
