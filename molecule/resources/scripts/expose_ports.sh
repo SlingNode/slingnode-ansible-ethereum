@@ -23,4 +23,9 @@ export SLINGNODE_EXECUTION=erigon SLINGNODE_CONSENSUS=nimbus SLINGNODE_VALIDATOR
 delimit
 molecule test -s expose_ports
 
+export SLINGNODE_EXECUTION=nethermind SLINGNODE_CONSENSUS=lodestar SLINGNODE_VALIDATOR=lodestar
+
+delimit
+molecule test -s expose_ports
+
 unset SLINGNODE_EXECUTION SLINGNODE_CONSENSUS SLINGNODE_VALIDATOR

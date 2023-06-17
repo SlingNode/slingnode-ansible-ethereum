@@ -74,6 +74,9 @@ services:
       - --checkpointSyncUrl={{ consensus_checkpoint_sync_url }}
 {% endif %}
       - --suggestedFeeRecipient={{ suggested_fee_recipient }}
+{% if lodestar_enable_monitoring_endpoint|bool == True %}
+      - --monitoring.endpoint={{ lodestar_monitoring_endpoint }}
+{% endif %}
 
 
 networks:
