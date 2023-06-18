@@ -25,6 +25,24 @@ services:
     volumes:
       - {{ blockchain_root_path }}/validator/lodestar:{{ lodestar_data_dir }}:rw
       - /etc/localtime:/etc/localtime:ro
+{% if expose_validator_api_port_to_host|bool == True and validator_keymanager_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+    ports:
+{% if expose_validator_api_port_to_host|bool == True and validator_keymanager_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_api_port }}:{{ validator_api_port }}/tcp
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+      - {{ host_ip_address_to_bind_to }}:{{ validator_client_metrics_port }}:{{ validator_client_metrics_port }}/tcp
+{% endif %}
+{% endif %}
+{% if expose_validator_api_port_to_host|bool == False and validator_keymanager_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
+    expose:
+{% if expose_validator_api_port_to_host|bool == False and validator_keymanager_enabled|bool == True %}
+      - {{ validator_api_port }}
+{% endif %}
+{% if expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True  %}
+      - {{ validator_client_metrics_port }}
+{% endif %}
+{% endif %}
     networks:
       - service_net
     <<: *logging
@@ -50,6 +68,7 @@ services:
       - --metrics.port="{{ validator_client_metrics_port }}"
 {% endif %}
       - --logLevel={{ lodestar_log_level }}
+      - --logFile="none"
       - --suggestedFeeRecipient={{ suggested_fee_recipient }}
 {% if lodestar_enable_monitoring_endpoint|bool == True %}
       - --monitoring.endpoint={{ lodestar_monitoring_endpoint }}

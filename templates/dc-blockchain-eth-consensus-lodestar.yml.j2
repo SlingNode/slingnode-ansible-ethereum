@@ -70,6 +70,7 @@ services:
       - --metrics.port="{{ consensus_client_metrics_port }}"
 {% endif %}
       - --logLevel={{ lodestar_log_level }}
+      - --logFile="none"
 {% if consensus_checkpoint_sync_enabled|bool == True %}
       - --checkpointSyncUrl={{ consensus_checkpoint_sync_url }}
 {% endif %}
