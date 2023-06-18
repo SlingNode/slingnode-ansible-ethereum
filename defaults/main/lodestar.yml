@@ -1,0 +1,20 @@
+---
+lodestar_docker_image: chainsafe/lodestar:latest
+
+lodestar_data_dir: /var/lib/lodestar
+
+lodestar_target_peers: 50
+
+# Specifies the verbosity level used when emitting logs to the terminal
+lodestar_log_level: info # possible values: info, debug, trace, warn, error, crit
+
+# Validator vars
+validator_keymanager_enabled: true
+lodestar_enable_doppelganger_protection: false
+lodestar_enable_monitoring_endpoint: false
+lodestar_monitoring_endpoint_api_key: ""
+lodestar_monitoring_endpoint_machine_name: SlingNode
+lodestar_monitoring_endpoint: >-
+  https://beaconcha.in/api/v1/client/metrics?apikey=
+  {{ lodestar_monitoring_endpoint_api_key }}
+  &machine={{ lodestar_monitoring_endpoint_machine_name }}
