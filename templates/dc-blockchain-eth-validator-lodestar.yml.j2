@@ -25,18 +25,18 @@ services:
     volumes:
       - {{ blockchain_root_path }}/validator/lodestar:{{ lodestar_data_dir }}:rw
       - /etc/localtime:/etc/localtime:ro
-{% if expose_validator_api_port_to_host|bool == True and validator_keymanager_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
+{% if expose_validator_api_port_to_host|bool == True and lodestar_validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
     ports:
-{% if expose_validator_api_port_to_host|bool == True and validator_keymanager_enabled|bool == True %}
+{% if expose_validator_api_port_to_host|bool == True and lodestar_validator_api_enabled|bool == True %}
       - {{ host_ip_address_to_bind_to }}:{{ validator_api_port }}:{{ validator_api_port }}/tcp
 {% endif %}
 {% if expose_validator_client_metrics_port_to_host|bool == True and validator_client_metrics_enabled|bool == True %}
       - {{ host_ip_address_to_bind_to }}:{{ validator_client_metrics_port }}:{{ validator_client_metrics_port }}/tcp
 {% endif %}
 {% endif %}
-{% if expose_validator_api_port_to_host|bool == False and validator_keymanager_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
+{% if expose_validator_api_port_to_host|bool == False and lodestar_validator_api_enabled|bool == True or expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True %}
     expose:
-{% if expose_validator_api_port_to_host|bool == False and validator_keymanager_enabled|bool == True %}
+{% if expose_validator_api_port_to_host|bool == False and lodestar_validator_api_enabled|bool == True %}
       - {{ validator_api_port }}
 {% endif %}
 {% if expose_validator_client_metrics_port_to_host|bool == False and validator_client_metrics_enabled|bool == True  %}
@@ -54,7 +54,7 @@ services:
       - --dataDir={{ lodestar_data_dir }}
       - --network={{ network }}
       - --beaconNodes={{ beacon_node }}
-{% if validator_keymanager_enabled|bool == True  %}
+{% if lodestar_validator_api_enabled|bool == True  %}
       - --keymanager=true
       - --keymanager.address=0.0.0.0
       - --keymanager.port={{ validator_api_port }}

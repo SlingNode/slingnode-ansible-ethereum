@@ -9,7 +9,7 @@ lodestar_target_peers: 50
 lodestar_log_level: info # possible values: info, debug, trace, warn, error, crit
 
 # Validator vars
-validator_keymanager_enabled: true
+lodestar_validator_api_enabled: true
 lodestar_enable_doppelganger_protection: false
 lodestar_enable_monitoring_endpoint: false
 lodestar_monitoring_endpoint_api_key: ""
