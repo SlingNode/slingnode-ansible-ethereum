@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.17.0] - 2023-07-02
 
+### Fixed
+
+- Fixed added task to update apt cache to avoid cache in Ubuntu
+
 ### Changed
 
 - Updated Nethermind image tag from v1.19.2 to v1.19.3

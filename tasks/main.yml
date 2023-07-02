@@ -5,6 +5,10 @@
     - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
     - "{{ ansible_os_family }}.yml"
 
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: ansible_os_family == 'Debian'
 
 - name: Install required software packages
   ansible.builtin.package:
