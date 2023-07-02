@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2023-07-02
+
+### Changed
+
+- Updated Nethermind image tag from v1.19.2 to v1.19.3
+- Updated Erigon image tag from v2.45.2 to v2.48.0
+- Updated Teku image tag from 23.6.0 to 23.6.1
+- Updated Besu image tag from 23.4.1 to 23.4.4
+- Updated Nimbus image tag from v23.5.0 to v23.6.1
+
 ## [0.16.0] - 2023-06-23
 
 ### Changed
