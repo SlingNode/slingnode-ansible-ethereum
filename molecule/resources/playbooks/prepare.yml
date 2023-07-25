@@ -10,6 +10,13 @@
     docker_install_compose_plugin: true
 
 
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+
+
   tasks:
     - name: Install docker
       ansible.builtin.include_role:
