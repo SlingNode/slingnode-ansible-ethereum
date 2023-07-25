@@ -59,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Besu image tag from 23.4.0 to 23.4.1
 
 ## [0.11.0] - 2023-05-20
+
 ### Changed
 
 - Updated Nimbus image tag from v23.5.0 to v23.5.1
@@ -66,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.10.0] - 2023-05-17
+
 ### Changed
 
 - Updated Prysm image tag from v4.0.3-hotfix to v4.0.4
@@ -78,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed community.docker version in README
 
 ## [0.8.0] - 2023-05-09
+
 ### Changed
 
 - Updated Ansible community.docker from 3.4.0 to 3.4.5
