@@ -1,5 +1,5 @@
 ---
-geth_docker_image: ethereum/client-go:v1.12.0
+geth_docker_image: ethereum/client-go:v1.12.2
 geth_data_dir: /gethdata
 geth_maxpeers: 50
 
