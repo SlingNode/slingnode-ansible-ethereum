@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2023-09-10
+
+### Changed
+
+- Updated Besu from 23.4.4 to 23.7.2
+- Updated Lighthouse from 4.3.0 to 4.4.1
+- Updated Prysm from 4.0.7 to 4.0.8
+- Updated Nimbus from 23.7.0 to 23.8.0
+- Updated Lodestar from 1.10.0 to 1.11.1
+- Updated Erigon from 2.48.1 to 2.49.0
+- Updated Teku from 23.8.0 to 23.9.0
+- Updated Nethermind from 1.20.1 to 1.20.3
+- Increased number of retries in verify tasks for expose_ports and multi_tier scenarios
+
 ## [0.20.0] - 2023-08-19
 
 ### Changed
