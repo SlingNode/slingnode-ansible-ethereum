@@ -11,7 +11,7 @@
     body_format: json
     body: '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":0}'
   register: execution_eth_chainid_response
-  retries: 20
+  retries: 30
   delay: 3
   until: execution_eth_chainid_response['status'] == 200
 
@@ -26,7 +26,7 @@
     headers:
       Content-Type: application/json
   register: execution_client_authrpc_port_response
-  retries: 20
+  retries: 30
   delay: 3
   until: execution_client_authrpc_port_response['status'] == 401 or execution_client_authrpc_port_response['status'] == 403
 
@@ -36,7 +36,7 @@
     url: "http://127.0.0.1:6060{{ '/metrics' if clients.execution == 'nethermind' or clients.execution == 'besu' else '/debug/metrics/prometheus' }}"
     method: GET
   register: execution_client_metrics_port_response
-  retries: 20
+  retries: 30
   delay: 3
   until: execution_client_metrics_port_response['status'] == 200
 
@@ -59,7 +59,7 @@
     url: "http://127.0.0.1:8008/metrics"
     method: GET
   register: consensus_client_metrics_port_response
-  retries: 20
+  retries: 30
   delay: 3
   until: consensus_client_metrics_port_response['status'] == 200
 
@@ -69,7 +69,7 @@
     url: "http://127.0.0.1:8009/metrics"
     method: GET
   register: validator_client_metrics_port_response
-  retries: 20
+  retries: 30
   delay: 3
   until: validator_client_metrics_port_response['status'] == 200
 

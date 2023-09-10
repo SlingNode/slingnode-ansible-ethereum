@@ -1,5 +1,5 @@
 ---
-lodestar_docker_image: chainsafe/lodestar:v1.10.0
+lodestar_docker_image: chainsafe/lodestar:v1.11.1
 
 lodestar_data_dir: /var/lib/lodestar
 
