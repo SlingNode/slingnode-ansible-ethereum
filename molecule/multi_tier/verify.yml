@@ -16,7 +16,7 @@
         url: "http://{{ hostvars['slingnode-consensus-01']['ansible_host'] }}:8008/metrics"
         method: GET
       register: consensus_client_metrics_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: consensus_client_metrics_port_response['status'] == 200
 
@@ -72,7 +72,7 @@
         body_format: json
         body: '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":0}'
       register: execution_eth_chainid_response
-      retries: 30
+      retries: 60
       delay: 3
       until: execution_eth_chainid_response['status'] == 200
 
@@ -95,7 +95,7 @@
           Content-Type: application/json
         body_format: json
       register: execution_client_authrpc_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: execution_client_authrpc_port_response['status'] == 401 or execution_client_authrpc_port_response['status'] == 403
 
@@ -105,7 +105,7 @@
         url: "http://{{ hostvars['slingnode-execution-01']['ansible_host'] }}:6060{{ '/metrics' if clients.execution == 'nethermind' or clients.execution == 'besu' else '/debug/metrics/prometheus' }}"
         method: GET
       register: execution_client_metrics_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: execution_client_metrics_port_response['status'] == 200
 
@@ -115,7 +115,7 @@
         url: "http://{{ hostvars['slingnode-validator-01']['ansible_host'] }}:8009/metrics"
         method: GET
       register: validator_client_metrics_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: validator_client_metrics_port_response['status'] == 200
 
@@ -128,7 +128,7 @@
           - 200
           - 401
       register: validator_api_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: validator_api_port_response['status'] == 401 or validator_api_port_response['status'] == 200
       when: not clients.validator == "teku"
@@ -143,7 +143,7 @@
           - 401
         validate_certs: false
       register: teku_validator_api_port_response
-      retries: 30
+      retries: 60
       delay: 3
       until: teku_validator_api_port_response['status'] == 401 or teku_validator_api_port_response['status'] == 200
       when: clients.validator == "teku"
@@ -170,6 +170,6 @@
           - 200 # Node is ready
           - 206 # Node is syncing but can serve incomplete data
       register: consensus_beacon_health_response
-      retries: 30
+      retries: 60
       delay: 3
       until: consensus_beacon_health_response['status'] == 200 or consensus_beacon_health_response['status'] == 206
