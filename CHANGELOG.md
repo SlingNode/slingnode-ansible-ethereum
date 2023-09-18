@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2023-09-18
+
+### Changed
+
+- Updated Nimbus from 23.8.0 to 23.9.0
+- Updated Erigon from 2.49.0 to 2.49.2
+- Updated Geth from 1.12.2 to 1.13.1
+- Increased number of retries in verify tasks for expose_ports and multi_tier scenarios to 60
+
 ## [0.21.0] - 2023-09-10
 
 ### Changed
