@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2023-09-27
+
+### Changed
+
+- Updated Lodestar from 1.11.1 to 1.11.3
+- Updated Nethermind from 1.20.3 to 1.20.4
+- Updated Besu from 23.7.2 to 23.7.3
+- Updated Lighthouse from 4.4.1 to 4.5.0
+- Updated Nimbus from 23.9.0 to 23.9.1
+- Updated Teku from 23.9.0 to 23.9.1
+
 ## [0.22.0] - 2023-09-18
 
 ### Changed
