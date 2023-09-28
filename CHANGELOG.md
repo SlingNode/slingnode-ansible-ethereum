@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2023-09-28
+
+### Changed
+
+- Updated Erigon from 2.49.2 to 2.49.3
+- Updated Geth from 1.13.1 to 1.13.2
+
 ## [0.23.0] - 2023-09-27
 
 ### Changed
