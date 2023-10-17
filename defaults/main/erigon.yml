@@ -1,5 +1,5 @@
 ---
-erigon_docker_image: thorax/erigon:v2.49.3
+erigon_docker_image: thorax/erigon:v2.52.5
 erigon_data_dir: /var/lib/erigon
 erigon_maxpeers: 100
 
