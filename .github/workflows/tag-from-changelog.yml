@@ -1,0 +1,25 @@
+name: Tag from changelog
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create tag from changelog
+        id: git-tag-from-changelog
+        uses: SlingNode/git-tag-from-changelog@0.1.0
