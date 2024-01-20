@@ -1,5 +1,5 @@
 ---
-besu_docker_image: hyperledger/besu:23.10.2
+besu_docker_image: hyperledger/besu:24.1.0
 # Besu passes the contents of the BESU_OPTS environment variable to the JVM. Set standard JVM options in the BESU_OPTS variable.
 besu_opts: "-Xmx5g"
 

@@ -1,6 +1,6 @@
 ---
-nimbus_docker_image_beacon: statusim/nimbus-eth2:amd64-v23.11.0
-nimbus_docker_image_validator: statusim/nimbus-validator-client:amd64-v23.11.0
+nimbus_docker_image_beacon: statusim/nimbus-eth2:amd64-v24.1.1
+nimbus_docker_image_validator: statusim/nimbus-validator-client:amd64-v24.1.1
 
 nimbus_data_dir: /var/lib/nimbus
 
