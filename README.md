@@ -57,7 +57,7 @@ The README file provides a basic overview only. Full documentation describing th
 Ansible Docker module is required on the Ansible controller. It can be installed using the below command:
 
 ```
-ansible-galaxy collection install community.docker:==3.4.5
+ansible-galaxy collection install community.docker:==3.8.0
 ```
 
 # Dependencies

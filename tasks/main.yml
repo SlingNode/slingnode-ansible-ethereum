@@ -71,7 +71,7 @@
   ansible.builtin.meta: flush_handlers
 
 
-- name: Install requried Python modules
+- name: Install required Python modules
   ansible.builtin.pip:
     name: "{{ item }}"
     executable: pip3
@@ -137,7 +137,7 @@
 
 
 - name: Start blockchain stack
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ blockchain_docker_compose_path }}"
     files: "{{ docker_compose_files.files | map(attribute='path') | list }}"
     remove_orphans: true
