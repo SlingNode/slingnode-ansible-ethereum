@@ -11,6 +11,16 @@
 
 
   pre_tasks:
+
+    - name: Remove docker repos - workaround for ansible-role-docker/issues/434
+      ansible.builtin.shell: |
+        rm /etc/apt/sources.list.d/docker.list
+        rm /etc/apt/sources.list.d/download_docker_com_linux_ubuntu.list
+      when: ansible_os_family == 'Debian'
+      ignore_errors: true
+      register: cmd_output
+      changed_when: cmd_output.rc != 0
+
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
