@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.33.0] - 2024-03-10
+
+### Changed
+
+- Updated Lodestar from 1.15.1 to 1.16.0
+- Updated Nimbus from 24.2.0 to 24.2.2
+- Updated Erigon from 2.57.3 to 2.58.1
+- Updated Besu from 24.1.1 to 24.3.0
+- Updated Nethermind from 1.25.3 to 1.25.4
+- Updated Teku from 24.1.1 to 24.3.0
+- Updated Lighthouse from 4.6.0 to 5.0.0
+- Updated Prysm from 4.2.1 to 5.0.1
+- Updated Geth from 1.13.12 to 1.13.14
+
 ## [0.32.0] - 2024-03-09
 
 ### Fixed
