@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.34.0] - 2024-03-12
+
+### Changed
+
+- Updated Lighthouse from 5.0.0 to 5.1.1
+- Updated Lodestar from 1.16.0 to 1.17.0
+- Updated Erigon from 2.58.1 to 2.58.2
+
 ## [0.33.0] - 2024-03-10
 
 ### Changed
