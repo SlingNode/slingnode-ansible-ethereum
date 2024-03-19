@@ -1,0 +1,70 @@
+---
+role_name_check: 1
+dependency:
+  name: galaxy
+  options:
+    ignore-certs: true
+    ignore-errors: true
+    role-file: requirements_dev.yml
+    requirements-file: requirements.yml
+
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+  provision: false
+  cachier: machine
+  parallel: true
+  default_box: '${SLINGNODE_BOX:-generic/ubuntu2204}'
+
+
+platforms:
+  - name: instance
+    hostname: slingnode-test-01
+    config_options:
+      ssh.keep_alive: true
+      ssh.remote_user: 'vagrant'
+      synced_folder: false
+    memory: 10240
+    cpus: 4
+    provider_options:
+      video_type: 'vga'
+      driver: 'kvm'
+      cpu_mode: 'host-passthrough'
+      video_vram: '16384'
+
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_PIPELINING: "True"
+  playbooks:
+    converge: ../resources/playbooks/converge.yml
+    prepare: ../resources/playbooks/prepare.yml
+  inventory:
+    group_vars:
+      all:
+        clients:
+          execution: ${SLINGNODE_EXECUTION:-geth}
+          consensus: ${SLINGNODE_CONSENSUS:-lighthouse}
+          validator: ${SLINGNODE_VALIDATOR:-lighthouse}
+        bootnodes: "enode://176b9417f511d05b6b2cf3e34b756cf0a7096b3094572a8f6ef4cdcb9d1f9d00683bf0f83347eebdf3b81c3521c2332086d9592802230bf528eaf606a1d9677b@13.93.54.137:30303,enode://46add44b9f13965f7b9875ac6b85f016f341012d84f975377573800a863526f4da19ae2c620ec73d11591fa9510e992ecc03ad0751f53cc02f7c7ed6d55c7291@94.237.54.114:30313"
+
+
+verifier:
+  name: ansible
+
+
+scenario:
+  name: bootnodes
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

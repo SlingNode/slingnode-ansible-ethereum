@@ -109,6 +109,9 @@ services:
 {% if besu_pruning_enabled|bool == True %}
       - --pruning-enabled
 {% endif %}
+{% if bootnodes %}
+      - --bootnodes={{ bootnodes }}
+{% endif %}
 
 
 networks:

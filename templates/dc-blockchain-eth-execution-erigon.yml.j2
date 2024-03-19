@@ -101,7 +101,9 @@ services:
       - --authrpc.vhosts={{ erigon_authrpc_vhosts }}
       - --authrpc.jwtsecret=/jwt/{{ jwt_secret_file }}
       - --maxpeers={{ erigon_maxpeers }}
-
+{% if bootnodes %}
+      - --staticpeers={{ bootnodes }}
+{% endif %}
 
 networks:
   service_net:
