@@ -122,7 +122,8 @@ expose_consensus_client_metrics_port_to_host: false
 # Checkpoint sync
 # Public endpoints https://eth-clients.github.io/checkpoint-sync-endpoints/
 consensus_checkpoint_sync_enabled: true
-consensus_checkpoint_sync_url: https://beaconstate-goerli.chainsafe.io
+consensus_checkpoint_sync_url: https://beaconstate.ethstaker.cc/
+# consensus_checkpoint_sync_url: https://beaconstate-goerli.chainsafe.io
 
 
 # validator client vars
@@ -164,3 +165,5 @@ container_keystore_dir: /keystore
 # do not control access to ports managed by docker. For details see https://docs.docker.com/network/iptables/.
 # See documenation for more details: TODO: link to our docs
 host_ip_address_to_bind_to: 127.0.0.1
+
+bootnodes: ""

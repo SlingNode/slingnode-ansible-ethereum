@@ -106,7 +106,9 @@ services:
       - --graphql.corsdomain={{ geth_graphql_corsdomain }}
       - --graphql.vhosts={{ geth_graphql_vhosts }}
 {% endif %}
-
+{% if bootnodes %}
+      - --bootnodes={{ bootnodes }}
+{% endif %}
 
 networks:
   service_net:

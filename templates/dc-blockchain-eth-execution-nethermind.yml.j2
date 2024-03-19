@@ -98,6 +98,10 @@ services:
       - --Sync.AncientReceiptsBarrier=1
       - --log={{ nethermind_log_level }}
       - --Pruning.FullPruningMaxDegreeOfParallelism={{ nethermind_pruning_full_pruning_max_degree_of_parallelism }}
+{% if bootnodes %}
+      - --Network.Bootnodes={{ bootnodes }}
+{% endif %}
+
 
 
 networks:
