@@ -93,7 +93,9 @@ services:
       - --Metrics.Enabled={{ execution_client_metrics_enabled | string | lower }}
       - --Metrics.ExposePort={{ execution_client_metrics_port }}
       - --Metrics.IntervalSeconds={{ nethermind_metrics_intervalseconds }}
+{% if not genesis_file %}
       - --config={{ network }}
+{% endif %}
       - --Sync.AncientBodiesBarrier=1
       - --Sync.AncientReceiptsBarrier=1
       - --log={{ nethermind_log_level }}
@@ -101,7 +103,9 @@ services:
 {% if bootnodes %}
       - --Network.Bootnodes={{ bootnodes }}
 {% endif %}
-
+{% if genesis_file %}
+      - --Init.ChainSpecPath={{ nethermind_data_dir }}/genesis.json
+{% endif %}
 
 
 networks:

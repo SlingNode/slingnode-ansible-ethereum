@@ -167,3 +167,6 @@ container_keystore_dir: /keystore
 host_ip_address_to_bind_to: 127.0.0.1
 
 bootnodes: ""
+
+# Nethermind and Besu only
+genesis_file: ""
