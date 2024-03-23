@@ -90,6 +90,19 @@
     mode: "0700"
 
 
+- name: Copy custom genesis file to the server (besu and nethermind only)
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ execution_client_user.user }}"
+    group: "{{ execution_client_group.group }}"
+    mode: "0700"
+  loop:
+    - src: "{{ genesis_file }}"
+      dest: "{{ blockchain_root_path }}/execution/{{ clients.execution }}/genesis.json"
+  when: genesis_file != "" and (clients.execution == "besu" or clients.execution == "nethermind")
+
+
 - name: Copy docker-compose files for execution client
   ansible.builtin.template:
     src: "{{ item.src }}"

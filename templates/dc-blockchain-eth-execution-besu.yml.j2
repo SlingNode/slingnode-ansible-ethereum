@@ -92,7 +92,9 @@ services:
       - --engine-jwt-secret=/jwt/{{ jwt_secret_file }}
       - --engine-rpc-port={{ execution_client_authrpc_port }}
       - --logging={{ besu_log_level }}
+{% if not genesis_file %}
       - --network={{ network }}
+{% endif %}
 {% if execution_client_metrics_enabled|bool == True %}
       - --metrics-enabled
       - --metrics-host=0.0.0.0
@@ -112,7 +114,9 @@ services:
 {% if bootnodes %}
       - --bootnodes={{ bootnodes }}
 {% endif %}
-
+{% if genesis_file %}
+      - --genesis-file={{ besu_data_dir }}/genesis.json
+{% endif %}
 
 networks:
   service_net:
